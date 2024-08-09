@@ -225,6 +225,29 @@
 #define IDR_STRING_TABLE                591
 #define IDI_UP_D                        592
 #define IDR_MINI_UI0                    593
+#define IDI_ARTIST                      594
+#define IDI_ALBUM                       595
+#define IDI_GENRE                       596
+#define IDI_YEAR                        597
+#define IDI_FILE_RELATE                 598
+#define IDI_BITRATE_D                   599
+#define IDI_STAR_D                      600
+#define IDI_MORE_D                      601
+#define IDR_CHINESE_PINGYIN             602
+#define IDI_RECENT_SONG                 603
+#define IDI_ALBUM_COVER                 605
+#define IDI_REVERB_D                    607
+#define IDI_PLAY_IN_PLAYLIST_D          608
+#define IDI_NOW_PLAYING                 609
+#define IDI_NOW_PLAYING_D               610
+#define IDI_KARAOKE                     611
+#define IDI_KARAOKE_D                   612
+#define IDB_OWNER_DRAW_TITLEBAR_PREVIEW 613
+#define IDB_SYSTEM_TITLEBAR_PREVIEW     614
+#define IDI_REFRESH_D                   615
+#define IDI_REFRESH                     616
+#define IDI_NEW_FOLDER                  617
+#define IDI_NEW_FOLDER_D                618
 #define IDC_LIST1                       1002
 #define IDC_PATH_LIST                   1002
 #define IDC_LYRIC_DOWN_LIST1            1002
@@ -358,6 +381,7 @@
 #define IDC_BITS_DIPTH                  1046
 #define IDC_COLOR_STATIC7               1047
 #define IDC_CHANNELS                    1047
+#define IDC_COLOR_STATIC8               1048
 #define IDC_YEAR_EDIT                   1050
 #define IDC_COMMENT_EDIT                1052
 #define IDC_EDIT1                       1061
@@ -559,6 +583,7 @@
 #define IDC_SHOW_MINIMIZE_BTN_CHECK     1208
 #define IDC_SHOW_MAXIMIZE_BTN_CHECK     1209
 #define IDC_ENABLE_LASTFM               1210
+#define IDC_SHOW_DARK_LIGHT_BTN_CHECK   1210
 #define IDC_LASTFM_STATUS               1211
 #define IDC_LASTFM_LEAST_DUR            1212
 #define IDC_LASTFM_LEAST_PERDUR         1213
@@ -608,7 +633,7 @@
 #define IDC_TXT_OPT_DATA_LANGUAGE_SEL_STATIC 1256
 #define IDC_TXT_OPT_DATA_DATA_FILE_CFG_STATIC 1257
 #define IDC_TXT_OPT_DATA_CLOSE_MAIN_WINDOW_STATIC 1258
-#define IDC_TXT_OPT_DATA_AUTO_DL_SETTING_STATIC 1259
+#define IDC_TXT_OPT_DATA_DL_SETTING_STATIC 1259
 #define IDC_TXT_OPT_DATA_AUTO_DL_LYRIC_SAVE_SEL_STATIC 1260
 #define IDC_TXT_OPT_DATA_AUTO_DL_COVER_SAVE_SEL_STATIC 1261
 #define IDC_TXT_OPT_DATA_MIDI_SETTING_STATIC 1262
@@ -714,6 +739,9 @@
 #define IDC_LYRIC_AND_TRANSLATION_IN_SAME_LINE_RADIO 1362
 #define IDC_DOWN_LOAD_LYRIC_TRANSLATION_FORMAT_STATIC 1363
 #define IDC_LYRIC_AND_TRANSLATION_IN_DIFFERENT_LINE_RADIO 1364
+#define IDC_SORT_BUTTON                 1365
+#define IDC_USE_SYSTEM_TITLEBAR_RADIO   1366
+#define IDC_USE_OWNER_DRAW_TITLEBAR_RADIO 1367
 #define ID_FILE_OPEN_FOLDER             32774
 #define ID_PLAY_PAUSE                   32778
 #define ID_STOP                         32779
@@ -941,14 +969,26 @@
 #define ID_PLAYLIST_BROWSE_FILE         33463
 #define ID_LYRIC_AND_TRANSLATION_IN_SAME_LINE 33464
 #define ID_LYRIC_AND_TRANSLATION_IN_DIFFERENT_LINE 33465
+#define ID_MORE_RECENT_ITEMS            33466
+#define ID_VIEW_IN_MEDIA_LIB            33467
+#define ID_RECENT_PLAYED_REMOVE         33468
+#define ID_LIB_PLAYLIST_SORT_RECENT_PLAYED 33469
+#define ID_LIB_PLAYLIST_SORT_RECENT_CREATED 33470
+#define ID_LIB_PLAYLIST_SORT_NAME       33471
+#define ID_LIB_FOLDER_SORT_RECENT_PLAYED 33472
+#define ID_LIB_FOLDER_SORT_RECENT_ADDED 33473
+#define ID_LIB_FOLDER_SORT_PATH         33474
+#define ID_LIB_PLAYLIST_PROPERTIES      33475
+#define ID_LIB_FOLDER_PROPERTIES        33476
+#define ID_LIB_RECENT_PLAYED_ITEM_PROPERTIES 33477
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        594
-#define _APS_NEXT_COMMAND_VALUE         33466
-#define _APS_NEXT_CONTROL_VALUE         1365
+#define _APS_NEXT_RESOURCE_VALUE        619
+#define _APS_NEXT_COMMAND_VALUE         33478
+#define _APS_NEXT_CONTROL_VALUE         1368
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

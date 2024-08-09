@@ -103,7 +103,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bass.lib;Powrprof.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;powrprof.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -133,7 +133,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bass_x64.lib;Powrprof.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;powrprof.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -167,7 +167,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bass.lib;Powrprof.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;powrprof.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -201,7 +201,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bass_x64.lib;Powrprof.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>api-ms-win-core-winrt-l1-1-0.dll;api-ms-win-core-winrt-string-l1-1-0.dll;api-ms-win-shcore-stream-winrt-l1-1-0.dll;powrprof.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -221,6 +221,7 @@
     <Text Include="compile_time.txt" />
     <Text Include="ReadMe.txt" />
     <Text Include="res\Acknowledgement.txt" />
+    <Text Include="res\hzpy-utf8.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
@@ -242,6 +243,7 @@
     <ClInclude Include="CDevicesManager.h" />
     <ClInclude Include="CDonateDlg.h" />
     <ClInclude Include="CFloatPlaylistDlg.h" />
+    <ClInclude Include="ChinesePingyinRes.h" />
     <ClInclude Include="CHotKey.h" />
     <ClInclude Include="CHotkeyManager.h" />
     <ClInclude Include="CHotKeySettingDlg.h" />
@@ -260,6 +262,7 @@
     <ClInclude Include="FileNameFormDlg.h" />
     <ClInclude Include="FilterHelper.h" />
     <ClInclude Include="FlacEncodeCfgDlg.h" />
+    <ClInclude Include="FolderPropertiesDlg.h" />
     <ClInclude Include="GetTagOnlineDlg.h" />
     <ClInclude Include="HorizontalSplitter.h" />
     <ClInclude Include="IconMgr.h" />
@@ -268,17 +271,24 @@
     <ClInclude Include="LastFMDataArchive.h" />
     <ClInclude Include="LyricRelateDlg.h" />
     <ClInclude Include="md5.h" />
+    <ClInclude Include="MediaLibItemPropertiesDlg.h" />
+    <ClInclude Include="PlaylistPropertiesDlg.h" />
+    <ClInclude Include="SimplePropertiesDlg.h" />
+    <ClInclude Include="UiMediaLibItemMgr.h" />
+    <ClInclude Include="MediaLibPlaylistMgr.h" />
     <ClInclude Include="MediaLibStatisticsDlg.h" />
     <ClInclude Include="MediaTransControls.h" />
     <ClInclude Include="MediaTransControlsImpl.h" />
     <ClInclude Include="MenuEditCtrl.h" />
     <ClInclude Include="MenuMgr.h" />
     <ClInclude Include="MiniModeUserUi.h" />
+    <ClInclude Include="MoreRecentItemDlg.h" />
     <ClInclude Include="PropertyAdvancedDlg.h" />
     <ClInclude Include="PropertyAlbumCoverDlg.h" />
     <ClInclude Include="PropertyDlg.h" />
     <ClInclude Include="PropertyDlgHelper.h" />
     <ClInclude Include="RecentFolderAndPlaylist.h" />
+    <ClInclude Include="RecentFolderMgr.h" />
     <ClInclude Include="RenameDlg.h" />
     <ClInclude Include="ScintillaEditView.h" />
     <ClInclude Include="SelectItemDlg.h" />
@@ -295,6 +305,7 @@
     <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="UIElement.h" />
     <ClInclude Include="UIWindow.h" />
+    <ClInclude Include="UIWindowCmdHelper.h" />
     <ClInclude Include="UserUi.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="DesktopLyric.h" />
@@ -403,6 +414,7 @@
     <ClCompile Include="CDevicesManager.cpp" />
     <ClCompile Include="CDonateDlg.cpp" />
     <ClCompile Include="CFloatPlaylistDlg.cpp" />
+    <ClCompile Include="ChinesePingyinRes.cpp" />
     <ClCompile Include="CHotKey.cpp" />
     <ClCompile Include="CHotkeyManager.cpp" />
     <ClCompile Include="CHotKeySettingDlg.cpp" />
@@ -422,6 +434,7 @@
     <ClCompile Include="FileNameFormDlg.cpp" />
     <ClCompile Include="FilterHelper.cpp" />
     <ClCompile Include="FlacEncodeCfgDlg.cpp" />
+    <ClCompile Include="FolderPropertiesDlg.cpp" />
     <ClCompile Include="GetTagOnlineDlg.cpp" />
     <ClCompile Include="HorizontalSplitter.cpp" />
     <ClCompile Include="IconMgr.cpp" />
@@ -429,17 +442,24 @@
     <ClCompile Include="LastFMDataArchive.cpp" />
     <ClCompile Include="LyricRelateDlg.cpp" />
     <ClCompile Include="md5.cpp" />
+    <ClCompile Include="MediaLibItemPropertiesDlg.cpp" />
+    <ClCompile Include="PlaylistPropertiesDlg.cpp" />
+    <ClCompile Include="SimplePropertiesDlg.cpp" />
+    <ClCompile Include="UiMediaLibItemMgr.cpp" />
+    <ClCompile Include="MediaLibPlaylistMgr.cpp" />
     <ClCompile Include="MediaLibStatisticsDlg.cpp" />
     <ClCompile Include="MediaTransControls.cpp" />
     <ClCompile Include="MediaTransControlsImpl.cpp" />
     <ClCompile Include="MenuEditCtrl.cpp" />
     <ClCompile Include="MenuMgr.cpp" />
     <ClCompile Include="MiniModeUserUi.cpp" />
+    <ClCompile Include="MoreRecentItemDlg.cpp" />
     <ClCompile Include="PropertyAdvancedDlg.cpp" />
     <ClCompile Include="PropertyAlbumCoverDlg.cpp" />
     <ClCompile Include="PropertyDlg.cpp" />
     <ClCompile Include="PropertyDlgHelper.cpp" />
     <ClCompile Include="RecentFolderAndPlaylist.cpp" />
+    <ClCompile Include="RecentFolderMgr.cpp" />
     <ClCompile Include="RenameDlg.cpp" />
     <ClCompile Include="ScintillaEditView.cpp" />
     <ClCompile Include="SelectItemDlg.cpp" />
@@ -462,6 +482,7 @@
     </ClCompile>
     <ClCompile Include="UIElement.cpp" />
     <ClCompile Include="UIWindow.cpp" />
+    <ClCompile Include="UIWindowCmdHelper.cpp" />
     <ClCompile Include="UserUi.cpp" />
     <ClCompile Include="DesktopLyric.cpp" />
     <ClCompile Include="DllLib.cpp" />
@@ -556,6 +577,7 @@
     <None Include="language\English.ini" />
     <None Include="res\drag.cur" />
     <None Include="res\MusicPlayer2.rc2" />
+    <None Include="res\text1.bin" />
     <None Include="skins\ui1.xml" />
     <None Include="skins\ui2.xml" />
     <None Include="skins\miniMode\miniMode00.xml" />
@@ -565,10 +587,14 @@
     <Image Include="res\add.ico" />
     <Image Include="res\AddTag.ico" />
     <Image Include="res\add_d.ico" />
+    <Image Include="res\album.ico" />
     <Image Include="res\album_cover.ico" />
+    <Image Include="res\album_cover_d.ico" />
     <Image Include="res\album_d.ico" />
+    <Image Include="res\artist.ico" />
     <Image Include="res\artist_d.ico" />
     <Image Include="res\bitrate.ico" />
+    <Image Include="res\bitrate_d.ico" />
     <Image Include="res\close.ico" />
     <Image Include="res\close_d.ico" />
     <Image Include="res\convert.ico" />
@@ -605,12 +631,15 @@
     <Image Include="res\Find.ico" />
     <Image Include="res\fix_d.ico" />
     <Image Include="res\folder_explore_d.ico" />
+    <Image Include="res\genre.ico" />
     <Image Include="res\genre_d.ico" />
     <Image Include="res\heart.ico" />
     <Image Include="res\help.ico" />
     <Image Include="res\help_d.ico" />
     <Image Include="res\hot_key.ico" />
     <Image Include="res\internal_lyric_d.ico" />
+    <Image Include="res\karaoke.ico" />
+    <Image Include="res\karaoke_d.ico" />
     <Image Include="res\light_mode.ico" />
     <Image Include="res\link.ico" />
     <Image Include="res\link_d.ico" />
@@ -633,17 +662,23 @@
     <Image Include="res\mini_d.ico" />
     <Image Include="res\mini_restore.ico" />
     <Image Include="res\mini_restore_d.ico" />
+    <Image Include="res\more_d.ico" />
     <Image Include="res\MusicPlayer2.ico" />
     <Image Include="res\MusicPlayer2_dark.ico" />
     <Image Include="res\MusicPlayer2_debug.ico" />
     <Image Include="res\MusicPlayer2_light.ico" />
     <Image Include="res\music_d.ico" />
+    <Image Include="res\new_folder.ico" />
+    <Image Include="res\new_folder_d.ico" />
     <Image Include="res\next_dark.ico" />
     <Image Include="res\next_white.ico" />
     <Image Include="res\notify_preview.bmp" />
     <Image Include="res\notify_preview_light.bmp" />
+    <Image Include="res\now_playing.ico" />
+    <Image Include="res\now_playing_d.ico" />
     <Image Include="res\ok.ico" />
     <Image Include="res\online_d.ico" />
+    <Image Include="res\owner_draw_titlebar_preview.bmp" />
     <Image Include="res\pause_dark.ico" />
     <Image Include="res\pause_white.ico" />
     <Image Include="res\pin_d.ico" />
@@ -654,17 +689,22 @@
     <Image Include="res\play_dark.ico" />
     <Image Include="res\play_in_folder.ico" />
     <Image Include="res\play_in_playlist.ico" />
+    <Image Include="res\play_in_playlist_d.ico" />
     <Image Include="res\play_pause_d.ico" />
     <Image Include="res\play_white.ico" />
     <Image Include="res\previous_dark.ico" />
     <Image Include="res\previous_white.ico" />
+    <Image Include="res\recent_songs.ico" />
     <Image Include="res\recent_songs_d.ico" />
+    <Image Include="res\refresh.ico" />
+    <Image Include="res\refresh_d.ico" />
     <Image Include="res\rename_d.ico" />
     <Image Include="res\Replace.ico" />
     <Image Include="res\ReplaceTag.ico" />
     <Image Include="res\restore.ico" />
     <Image Include="res\restore_d.ico" />
     <Image Include="res\reverb.ico" />
+    <Image Include="res\reverb_d.ico" />
     <Image Include="res\rew_new_d.ico" />
     <Image Include="res\Save.ico" />
     <Image Include="res\save_as_d.ico" />
@@ -679,11 +719,13 @@
     <Image Include="res\sort_d.ico" />
     <Image Include="res\speed_up_d.ico" />
     <Image Include="res\star.ico" />
+    <Image Include="res\star_d.ico" />
     <Image Include="res\statistics_d.ico" />
     <Image Include="res\stop_dark.ico" />
     <Image Include="res\stop_white.ico" />
     <Image Include="res\switch.ico" />
     <Image Include="res\switch_d.ico" />
+    <Image Include="res\system_titlebar_preview.bmp" />
     <Image Include="res\tag.ico" />
     <Image Include="res\toolbar1.bmp" />
     <Image Include="res\unlink.ico" />
@@ -697,6 +739,7 @@
     <Image Include="res\volume2_d.ico" />
     <Image Include="res\volume3.ico" />
     <Image Include="res\volume3_d.ico" />
+    <Image Include="res\year.ico" />
     <Image Include="res\year_d.ico" />
     <Image Include="res\上一曲.ico" />
     <Image Include="res\下一曲.ico" />

@@ -7,6 +7,8 @@
 #include "SetPathDlg.h"
 #include "MusicPlayerCmdHelper.h"
 #include "RecentFolderAndPlaylist.h"
+#include "FolderPropertiesDlg.h"
+#include "COSUPlayerHelper.h"
 
 
 // CSetPathDlg 对话框
@@ -28,7 +30,7 @@ void CSetPathDlg::QuickSearch(const wstring & key_word)
     m_search_result.clear();
     for (size_t i{}; i < m_path_list_info.size(); ++i)
     {
-        if (CCommon::StringFindNoCase(m_path_list_info[i].path, key_word) != wstring::npos)
+        if (theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(key_word, m_path_list_info[i].path))
             m_search_result.push_back(i);
     }
 }
@@ -45,6 +47,28 @@ void CSetPathDlg::RefreshTabData()
 {
     ShowPathList();
     SetButtonsEnable();
+}
+
+bool CSetPathDlg::SetCurSel(const wstring& folder_path)
+{
+    if (!m_searched)
+    {
+        int index{ -1 };
+        for (size_t i{}; i < m_path_list_info.size(); i++)
+        {
+            if (m_path_list_info[i].path == folder_path)
+                index = i;
+        }
+
+        if (index >= 0)
+        {
+            m_path_list.SetCurSel(index);
+            m_path_list.EnsureVisible(index, FALSE);
+            return true;
+        }
+        return false;
+    }
+    return true;
 }
 
 bool CSetPathDlg::SelectValid() const
@@ -68,7 +92,7 @@ PathInfo CSetPathDlg::GetSelPath() const
 
 bool CSetPathDlg::SelectedCanPlay() const
 {
-    return SelectValid() && (CPlayer::GetInstance().IsPlaylistMode() || GetSelPath().path != CPlayer::GetInstance().GetCurrentDir2());
+    return SelectValid() && (!CPlayer::GetInstance().IsFolderMode() || GetSelPath().path != CPlayer::GetInstance().GetCurrentDir2());
 }
 
 void CSetPathDlg::SetButtonsEnable()
@@ -83,8 +107,9 @@ void CSetPathDlg::ShowPathList()
 {
     // 这里的更新m_path_list_info操作本应有独立方法不过暂时还不必要，先放这里
     m_path_list_info.clear();
-    const deque<PathInfo>& recent_path = CPlayer::GetInstance().GetRecentPath();
-    std::copy(recent_path.begin(), recent_path.end(), std::back_inserter(m_path_list_info));
+    CRecentFolderMgr::Instance().IteratePathInfo([&](const PathInfo& path_info) {
+        m_path_list_info.push_back(path_info);
+    });
 
     m_path_list.EnableWindow(TRUE);
     m_path_list.DeleteAllItems();
@@ -95,6 +120,7 @@ void CSetPathDlg::ShowPathList()
             m_path_list.InsertItem(i, std::to_wstring(i + 1).c_str());
             SetListRowData(i, m_path_list_info[i]);
         }
+        m_path_list.SetHightItem(CRecentFolderMgr::Instance().GetCurrentPlaylistIndex());
     }
     else        //只显示搜索结果的曲目
     {
@@ -109,12 +135,19 @@ void CSetPathDlg::ShowPathList()
             return;
         }
         int index{};
+        int highlight_index_searched{ -1 };
+        int highlight_index{ CRecentFolderMgr::Instance().GetCurrentPlaylistIndex() };
         for (size_t i : m_search_result)
         {
             m_path_list.InsertItem(index, std::to_wstring(i + 1).c_str());
             SetListRowData(index, m_path_list_info[i]);
+
+            if (highlight_index == i)
+                highlight_index_searched = index;
+
             ++index;
         }
+        m_path_list.SetHightItem(highlight_index_searched);
     }
 }
 
@@ -140,7 +173,7 @@ void CSetPathDlg::SetListRowData(int index, const PathInfo & path_info)
     m_path_list.SetItemText(index, 2, path_info.path.c_str());
 
     if (path_info.contain_sub_folder)
-        m_path_list.SetItemText(index, 3, theApp.m_str_table.LoadText(L"TXT_LIB_PAHT_IS_CONTAIN_SUB_FOLDER_YES").c_str());
+        m_path_list.SetItemText(index, 3, theApp.m_str_table.LoadText(L"TXT_LIB_PATH_IS_CONTAIN_SUB_FOLDER_YES").c_str());
     else
         m_path_list.SetItemText(index, 3, _T(""));
 
@@ -157,7 +190,7 @@ void CSetPathDlg::SetListRowData(int index, const PathInfo & path_info)
 
 void CSetPathDlg::OnTabEntered()
 {
-    if (!CPlayer::GetInstance().IsPlaylistMode())
+    if (CPlayer::GetInstance().IsFolderMode())
         m_path_name.SetWindowText(CPlayer::GetInstance().GetCurrentDir2().c_str());
     ShowPathList();
     m_list_selected = m_path_list.GetCurSel();
@@ -166,19 +199,18 @@ void CSetPathDlg::OnTabEntered()
 
 bool CSetPathDlg::InitializeControls()
 {
-    wstring temp;
-    temp = theApp.m_str_table.LoadText(L"TXT_LIB_PATH_CURRENT_FOLDER");
-    SetDlgItemTextW(IDC_TXT_LIB_PATH_CURRENT_FOLDER_STATIC, temp.c_str());
+    SetDlgControlText(IDC_TXT_LIB_PATH_CURRENT_FOLDER_STATIC, L"TXT_LIB_PATH_CURRENT_FOLDER");
     // IDC_PATH_EDIT
-    temp = theApp.m_str_table.LoadText(L"TXT_LIB_PATH_OPEN_NEW_FOLDER");
-    SetDlgItemTextW(IDC_OPEN_FOLDER, temp.c_str());
+    SetDlgControlText(IDC_OPEN_FOLDER, L"TXT_LIB_PATH_OPEN_NEW_FOLDER");
+    SetDlgControlText(IDC_SORT_BUTTON, L"TXT_LIB_PLAYLIST_SORT");
     // IDC_SEARCH_EDIT
     // IDC_PATH_LIST
 
     RepositionTextBasedControls({
         { CtrlTextInfo::L1, IDC_TXT_LIB_PATH_CURRENT_FOLDER_STATIC },
         { CtrlTextInfo::C0, IDC_PATH_EDIT },
-        { CtrlTextInfo::R1, IDC_OPEN_FOLDER, CtrlTextInfo::W32 }
+        { CtrlTextInfo::R1, IDC_OPEN_FOLDER, CtrlTextInfo::W32 },
+        { CtrlTextInfo::R2, IDC_SORT_BUTTON, CtrlTextInfo::W32 }
         });
     return true;
 }
@@ -208,6 +240,13 @@ BEGIN_MESSAGE_MAP(CSetPathDlg, CTabDlg)
     //ON_BN_CLICKED(IDC_CLEAR_BUTTON, &CSetPathDlg::OnBnClickedClearButton)
     ON_MESSAGE(WM_SEARCH_EDIT_BTN_CLICKED, &CSetPathDlg::OnSearchEditBtnClicked)
     ON_COMMAND(ID_CONTAIN_SUB_FOLDER, &CSetPathDlg::OnContainSubFolder)
+    ON_BN_CLICKED(IDC_SORT_BUTTON, &CSetPathDlg::OnBnClickedSortButton)
+    ON_COMMAND(ID_LIB_FOLDER_SORT_RECENT_PLAYED, &CSetPathDlg::OnLibFolderSortRecentPlayed)
+    ON_COMMAND(ID_LIB_FOLDER_SORT_RECENT_ADDED, &CSetPathDlg::OnLibFolderSortRecentAdded)
+    ON_COMMAND(ID_LIB_FOLDER_SORT_PATH, &CSetPathDlg::OnLibFolderSortPath)
+    ON_COMMAND(ID_LIB_FOLDER_PROPERTIES, &CSetPathDlg::OnLibFolderProperties)
+    ON_COMMAND(ID_FILE_OPEN_FOLDER, &CSetPathDlg::OnFileOpenFolder)
+    ON_COMMAND(ID_ADD_TO_NEW_PLAYLIST, &CSetPathDlg::OnAddToNewPlaylist)
 END_MESSAGE_MAP()
 
 
@@ -223,6 +262,9 @@ BOOL CSetPathDlg::OnInitDialog()
     //设置列表控件主题颜色
     //m_path_list.SetColor(theApp.m_app_setting_data.theme_color);
 
+    SetButtonIcon(IDC_OPEN_FOLDER, IconMgr::IconType::IT_NewFolder);
+    SetButtonIcon(IDC_SORT_BUTTON, IconMgr::IconType::IT_Sort_Mode);
+
     //初始化播放列表控件
     vector<int> width;
     CalculateColumeWidth(width);
@@ -230,7 +272,7 @@ BOOL CSetPathDlg::OnInitDialog()
     m_path_list.InsertColumn(0, theApp.m_str_table.LoadText(L"TXT_SERIAL_NUMBER").c_str(), LVCFMT_LEFT, width[0]);
     m_path_list.InsertColumn(1, theApp.m_str_table.LoadText(L"TXT_FOLDER").c_str(), LVCFMT_LEFT, width[1]);
     m_path_list.InsertColumn(2, theApp.m_str_table.LoadText(L"TXT_PATH").c_str(), LVCFMT_LEFT, width[2]);
-    m_path_list.InsertColumn(3, theApp.m_str_table.LoadText(L"TXT_LIB_PAHT_IS_CONTAIN_SUB_FOLDER").c_str(), LVCFMT_LEFT, width[3]);
+    m_path_list.InsertColumn(3, theApp.m_str_table.LoadText(L"TXT_LIB_PATH_IS_CONTAIN_SUB_FOLDER").c_str(), LVCFMT_LEFT, width[3]);
     m_path_list.InsertColumn(4, theApp.m_str_table.LoadText(L"TXT_LAST_PLAYED_TRACK").c_str(), LVCFMT_LEFT, width[4]);
     m_path_list.InsertColumn(5, theApp.m_str_table.LoadText(L"TXT_NUM_OF_TRACK").c_str(), LVCFMT_LEFT, width[5]);
     m_path_list.InsertColumn(6, theApp.m_str_table.LoadText(L"TXT_TOTAL_LENGTH").c_str(), LVCFMT_LEFT, width[6]);
@@ -317,38 +359,13 @@ void CSetPathDlg::OnOK()
 void CSetPathDlg::OnBnClickedOpenFolder()
 {
     // TODO: 在此添加控件通知处理程序代码
-    static bool include_sub_dir{ false };
-    static CString include_sub_dir_str{ theApp.m_str_table.LoadText(L"TXT_FOLDER_BROWSER_INCLUDE_SUB_DIR").c_str() };
-    const wstring& title = theApp.m_str_table.LoadText(L"TITLE_FOLDER_BROWSER_SONG_SOURCE");
-    // 这里原来使用WM_COMMAND, ID_FILE_OPEN_FOLDER但菜单命令无法返回用户是否点击“取消”
-#ifdef COMPILE_IN_WIN_XP
-    CFolderBrowserDlg folderPickerDlg(this->GetSafeHwnd());
-    folderPickerDlg.SetInfo(title.c_str());
-#else
-    CFilePathHelper current_path(CPlayer::GetInstance().GetCurrentDir());
-    CFolderPickerDialog folderPickerDlg(current_path.GetParentDir().c_str());
-    folderPickerDlg.m_ofn.lpstrTitle = title.c_str();
-    folderPickerDlg.AddCheckButton(IDC_OPEN_CHECKBOX, include_sub_dir_str, include_sub_dir);     //在打开对话框中添加一个复选框
-#endif
-    if (folderPickerDlg.DoModal() == IDOK)
+    CMusicPlayerCmdHelper helper(this);
+    if (helper.OnOpenFolder())
     {
-#ifndef COMPILE_IN_WIN_XP
-        BOOL checked;
-        folderPickerDlg.GetCheckButtonState(IDC_OPEN_CHECKBOX, checked);
-        include_sub_dir = (checked != FALSE);
-#endif
-        if (!CPlayer::GetInstance().OpenFolder(wstring(folderPickerDlg.GetPathName()), include_sub_dir))
-        {
-            const wstring& info = theApp.m_str_table.LoadText(L"MSG_WAIT_AND_RETRY");
-            MessageBox(info.c_str(), NULL, MB_ICONINFORMATION | MB_OK);
-        }
-        else
-        {
-            CTabDlg::OnOK();
-            CWnd* pParent = GetParentWindow();
-            if (pParent != nullptr)
-                ::PostMessage(pParent->GetSafeHwnd(), WM_COMMAND, IDOK, 0);
-        }
+        CTabDlg::OnOK();
+        CWnd* pParent = GetParentWindow();
+        if (pParent != nullptr)
+            ::PostMessage(pParent->GetSafeHwnd(), WM_COMMAND, IDOK, 0);
     }
 }
 
@@ -366,22 +383,10 @@ void CSetPathDlg::OnDeletePath()
     if (SelectValid())
     {
         wstring del_path = GetSelPath().path;
-        // 如果是当前播放则使用CPlayer成员方法处理
-        if (!CPlayer::GetInstance().IsPlaylistMode() && CPlayer::GetInstance().GetCurrentDir2() == del_path)
+        CMusicPlayerCmdHelper helper(this);
+        if (helper.OnDeleteRecentFolder(del_path))
         {
-            if (!CPlayer::GetInstance().RemoveCurPlaylistOrFolder())
-            {
-                const wstring& info = theApp.m_str_table.LoadText(L"MSG_WAIT_AND_RETRY");
-                MessageBox(info.c_str(), NULL, MB_ICONINFORMATION | MB_OK);
-            }
-        }
-        else
-        {
-            deque<PathInfo>& recent_path = CPlayer::GetInstance().GetRecentPath();
-            auto iter = std::find_if(recent_path.begin(), recent_path.end(), [&](const PathInfo& info) { return info.path == del_path; });
-            recent_path.erase(iter);        // 删除选中的路径
             ShowPathList();                 // 重新显示路径列表
-            CRecentFolderAndPlaylist::Instance().Init();
         }
     }
 }
@@ -398,8 +403,8 @@ void CSetPathDlg::OnBrowsePath()
 void CSetPathDlg::OnClearInvalidPath()
 {
     // TODO: 在此添加命令处理程序代码
-    const wstring& inquary_info = theApp.m_str_table.LoadText(L"MSG_LIB_PATH_CLEAR_INQUARY");
-    if (MessageBox(inquary_info.c_str(), NULL, MB_ICONQUESTION | MB_OKCANCEL) == IDCANCEL)
+    const wstring& inquiry_info = theApp.m_str_table.LoadText(L"MSG_LIB_PATH_CLEAR_INQUIRY");
+    if (MessageBox(inquiry_info.c_str(), NULL, MB_ICONQUESTION | MB_OKCANCEL) == IDCANCEL)
         return;
     int cleard_cnt = CMusicPlayerCmdHelper::CleanUpRecentFolders();
     ShowPathList();     // 重新显示路径列表
@@ -421,6 +426,18 @@ void CSetPathDlg::OnInitMenu(CMenu* pMenu)
     pMenu->EnableMenuItem(ID_CONTAIN_SUB_FOLDER, MF_BYCOMMAND | (select_valid ? MF_ENABLED : MF_GRAYED));
     bool contain_sub_folder{ select_valid && GetSelPath().contain_sub_folder };
     pMenu->CheckMenuItem(ID_CONTAIN_SUB_FOLDER, MF_BYCOMMAND | (contain_sub_folder ? MF_CHECKED : MF_UNCHECKED));
+
+    switch (CRecentFolderMgr::Instance().GetSortMode())
+    {
+    case CRecentFolderMgr::SM_RECENT_PLAYED: pMenu->CheckMenuRadioItem(ID_LIB_FOLDER_SORT_RECENT_PLAYED, ID_LIB_FOLDER_SORT_PATH, ID_LIB_FOLDER_SORT_RECENT_PLAYED, MF_BYCOMMAND | MF_CHECKED); break;
+    case CRecentFolderMgr::SM_RECENT_ADDED: pMenu->CheckMenuRadioItem(ID_LIB_FOLDER_SORT_RECENT_PLAYED, ID_LIB_FOLDER_SORT_PATH, ID_LIB_FOLDER_SORT_RECENT_ADDED, MF_BYCOMMAND | MF_CHECKED); break;
+    case CRecentFolderMgr::SM_PATH: pMenu->CheckMenuRadioItem(ID_LIB_FOLDER_SORT_RECENT_PLAYED, ID_LIB_FOLDER_SORT_PATH, ID_LIB_FOLDER_SORT_PATH, MF_BYCOMMAND | MF_CHECKED); break;
+    }
+
+    for (UINT id = ID_ADD_TO_DEFAULT_PLAYLIST; id < ID_ADD_TO_MY_FAVOURITE + ADD_TO_PLAYLIST_MAX_SIZE + 1; id++)
+    {
+        pMenu->EnableMenuItem(id, MF_BYCOMMAND | MF_ENABLED);
+    }
 }
 
 
@@ -481,7 +498,7 @@ void CSetPathDlg::OnContainSubFolder()
         wstring sel_path = GetSelPath().path;       // 当前选中项
 
         // 如果是当前播放则使用CPlayer成员方法更改（会启动播放列表初始化）不需要操作CPlayer::GetInstance().GetRecentPath()
-        if (!CPlayer::GetInstance().IsPlaylistMode() && CPlayer::GetInstance().GetCurrentDir2() == sel_path)
+        if (CPlayer::GetInstance().IsFolderMode() && CPlayer::GetInstance().GetCurrentDir2() == sel_path)
         {
             if (!CPlayer::GetInstance().SetContainSubFolder())
             {
@@ -491,13 +508,96 @@ void CSetPathDlg::OnContainSubFolder()
         }
         else
         {
-            deque<PathInfo>& recent_path = CPlayer::GetInstance().GetRecentPath();
-            auto iter = std::find_if(recent_path.begin(), recent_path.end(), [&](const PathInfo& info) { return info.path == sel_path; });
-            if (iter != recent_path.end())
+            bool found = CRecentFolderMgr::Instance().FindItem(sel_path, [](PathInfo& path_info) {
+                path_info.contain_sub_folder = !path_info.contain_sub_folder;
+            });
+            if (found)
             {
-                iter->contain_sub_folder = !iter->contain_sub_folder;
                 ShowPathList();     // 重新显示路径列表
             }
         }
     }
+}
+
+
+void CSetPathDlg::OnBnClickedSortButton()
+{
+    CWnd* pBtn = GetDlgItem(IDC_SORT_BUTTON);
+    CPoint point;
+    if (pBtn != nullptr)
+    {
+        CRect rect;
+        pBtn->GetWindowRect(rect);
+        point.x = rect.left;
+        point.y = rect.bottom;
+        CMenu* pMenu = theApp.m_menu_mgr.GetMenu(MenuMgr::LibFolderSortMenu);
+        if (pMenu != NULL)
+            pMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+    }
+}
+
+
+void CSetPathDlg::OnLibFolderSortRecentPlayed()
+{
+    if (CRecentFolderMgr::Instance().SetSortMode(CRecentFolderMgr::SM_RECENT_PLAYED))
+    {
+        ShowPathList();
+    }
+}
+
+
+void CSetPathDlg::OnLibFolderSortRecentAdded()
+{
+    if (CRecentFolderMgr::Instance().SetSortMode(CRecentFolderMgr::SM_RECENT_ADDED))
+    {
+        ShowPathList();
+    }
+}
+
+
+void CSetPathDlg::OnLibFolderSortPath()
+{
+    if (CRecentFolderMgr::Instance().SetSortMode(CRecentFolderMgr::SM_PATH))
+    {
+        ShowPathList();
+    }
+}
+
+
+void CSetPathDlg::OnLibFolderProperties()
+{
+    CFolderPropertiesDlg dlg(GetSelPath());
+    dlg.DoModal();
+}
+
+
+void CSetPathDlg::OnFileOpenFolder()
+{
+    OnBnClickedOpenFolder();
+}
+
+
+BOOL CSetPathDlg::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+    WORD command = LOWORD(wParam);
+    PathInfo path_info = GetSelPath();
+    auto getSelectedItems = [&](std::vector<SongInfo>& song_list) {
+        CRecentFolderMgr::GetFolderAudioFiles(path_info, song_list);
+    };
+    CMusicPlayerCmdHelper helper(this);
+    helper.OnAddToPlaylistCommand(getSelectedItems, command);
+
+    return CTabDlg::OnCommand(wParam, lParam);
+}
+
+
+void CSetPathDlg::OnAddToNewPlaylist()
+{
+    PathInfo path_info = GetSelPath();
+    auto getSelectedItems = [&](std::vector<SongInfo>& song_list) {
+        CRecentFolderMgr::GetFolderAudioFiles(path_info, song_list);
+    };
+    CMusicPlayerCmdHelper cmd_helper(this);
+    wstring playlist_path;
+    cmd_helper.OnAddToNewPlaylist(getSelectedItems, playlist_path, CFilePathHelper(path_info.path).GetFolderName());
 }

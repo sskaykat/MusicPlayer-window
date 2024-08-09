@@ -2,7 +2,18 @@
 #include "UIWindow.h"
 #include "MusicPlayer2.h"
 #include "MusicPlayerDlg.h"
+#include "UIWindowCmdHelper.h"
 
+IPlayerUI* CUIWindow::GetCurUi() const
+{
+    IPlayerUI* minimode_ui{};
+    CMusicPlayerDlg* pDlg = CMusicPlayerDlg::GetInstance();
+    if (pDlg != nullptr && pDlg->IsMiniMode())
+        minimode_ui = pDlg->GetMinimodeDlg()->GetCurUi();
+    if (minimode_ui != nullptr)
+        return minimode_ui;
+    return m_pUI;
+}
 
 void CUIWindow::PreSubclassWindow()
 {
@@ -36,6 +47,7 @@ BEGIN_MESSAGE_MAP(CUIWindow, CStatic)
     ON_WM_MOUSELEAVE()
     ON_MESSAGE(WM_TABLET_QUERYSYSTEMGESTURESTATUS, &CUIWindow::OnTabletQuerysystemgesturestatus)
     ON_WM_RBUTTONDOWN()
+    ON_WM_INITMENU()
 END_MESSAGE_MAP()
 
 
@@ -241,4 +253,24 @@ void CUIWindow::OnRButtonDown(UINT nFlags, CPoint point)
     m_pUI->RButtonDown(point);
 
     CStatic::OnRButtonDown(nFlags, point);
+}
+
+
+BOOL CUIWindow::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+    // TODO: 在此添加专用代码和/或调用基类
+    WORD command = LOWORD(wParam);
+
+    CUIWindowCmdHelper helper(GetCurUi());
+    helper.OnUiCommand(command);
+
+    return CStatic::OnCommand(wParam, lParam);
+}
+
+void CUIWindow::OnInitMenu(CMenu* pMenu)
+{
+    CStatic::OnInitMenu(pMenu);
+
+    CUIWindowCmdHelper helper(GetCurUi());
+    helper.SetMenuState(pMenu);
 }

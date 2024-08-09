@@ -22,9 +22,18 @@ namespace UiElement
     class Volume;
     class BeatIndicator;
     class StackElement;
+    class ListElement;
     class Playlist;
     class PlaylistIndicator;
     class ClassicalControlBar;
+    class MediaLibItemList;
+    class MediaLibPlaylist;
+    class MediaLibFolder;
+    class RecentPlayedList;
+    class NavigationBar;
+    class MyFavouriteList;
+    class AllTracksList;
+    class MiniSpectrum;
 }
 
 struct SLayoutData
@@ -66,9 +75,20 @@ public:
     friend class UiElement::Volume;
     friend class UiElement::BeatIndicator;
     friend class UiElement::StackElement;
+    friend class UiElement::ListElement;
     friend class UiElement::Playlist;
     friend class UiElement::PlaylistIndicator;
     friend class UiElement::ClassicalControlBar;
+    friend class UiElement::MediaLibItemList;
+    friend class UiElement::MediaLibPlaylist;
+    friend class UiElement::MediaLibFolder;
+    friend class UiElement::RecentPlayedList;
+    friend class UiElement::NavigationBar;
+    friend class UiElement::MyFavouriteList;
+    friend class UiElement::AllTracksList;
+    friend class UiElement::MiniSpectrum;
+
+    friend class UiFontGuard;
 
 public:
     void Init(CDC* pDC) override;
@@ -168,9 +188,14 @@ public:
         BTN_ADD_TO_PLAYLIST,    //添加到播放列表按钮
         BTN_SWITCH_DISPLAY,     //切换界面中的stackElement
         BTN_DARK_LIGHT,         //切换深色/浅色模式
+        BTN_DARK_LIGHT_TITLE_BAR, //标题栏中的切换深色/浅色模式
         BTN_LOCATE_TO_CURRENT,  //播放列表定位到当前播放
-        BTN_PLAYLIST_DROP_DOWN, //播放列表下拉按钮
-        BTN_PLAYLIST_MENU,      //播放列表菜单按键
+        BTN_OPEN_FOLDER,        //打开文件夹
+        BTN_NEW_PLAYLIST,       //新建播放列表
+        BTN_PLAY_MY_FAVOURITE,  //播放“我喜欢的音乐”
+        BTN_MEDIALIB_FOLDER_SORT, //媒体库“文件夹”排序方式
+        BTN_MEDIALIB_PLAYLIST_SORT, //媒体库“播放列表”排序方式
+        BTN_KARAOKE,
 
         //菜单栏
         MENU_FILE,
@@ -195,6 +220,9 @@ public:
     // 将BtnKey枚举和当前状态组合映射为IconMgr::IconType枚举
     IconMgr::IconType GetBtnIconType(BtnKey key);
 
+    //获取按钮的文本
+    std::wstring GetButtonText(BtnKey key_type);
+
 protected:
     struct DrawData
     {
@@ -208,7 +236,7 @@ protected:
     virtual void PreDrawInfo();
     void SetDrawRect();
     void DrawBackground();
-    void DrawSongInfo(CRect rect, bool reset = false);
+    void DrawSongInfo(CRect rect, int font_size = 9, bool reset = false);
     void DrawRectangle(const CRect& rect, bool no_corner_radius = false, bool theme_color = true, ColorMode color_mode = RCM_AUTO);       //绘制矩形。如果no_corner_radius为true，则总是绘制直角矩形，忽略“使用圆角风格按钮”的设置；theme_color：是否使用主题彦颜色
     void DrawToolBar(CRect rect, bool draw_translate_button);
     void DrawToolBarWithoutBackground(CRect rect, bool draw_translate_button);
@@ -219,15 +247,16 @@ protected:
     void DrawProgess(CRect rect);                   //绘制进度条
     void DrawTranslateButton(CRect rect);
     void DrawDesktopLyricButton(CRect rect);
-    int DrawTopRightIcons(bool always_show_full_screen = false);            //绘制右上角的图标。返回总宽度
+    void DrawKaraokeButton(CRect rect);
+    void DrawTopRightIcons();           //绘制右上角的图标
     void DrawCurrentTime();             //在右上角绘制当前系统时间
     void DrawAlbumCover(CRect rect);                //绘制专辑封面
     void DrawAlbumCoverWithInfo(CRect rect);        //绘制专辑封面，并在上面绘制歌曲的标题和艺术家
     void DrawVolumeButton(CRect rect, bool adj_btn_top = false, bool show_text = true);     //adj_btn_top：点击后弹出的音量调整按钮是否在上方；show_text：是否显示文本
     void DrawABRepeatButton(CRect rect);
-    void DrawLyrics(CRect rect, CFont* lyric_font, CFont* lyric_tr_font, bool with_background);        //绘制歌词 rect：歌曲区域；with_background是否绘制背景
-    void DrawPlaylist(CRect rect, UiElement::Playlist* playlist_element, int item_height);                  //绘制播放列表
-    void DrawCurrentPlaylistIndicator(CRect rect);      //绘制当前播放列表指示
+    void DrawLyrics(CRect rect, CFont* lyric_font, CFont* lyric_tr_font, bool with_background, bool show_song_info = false);        //绘制歌词 rect：歌曲区域；with_background是否绘制背景；show_song_info:是否总是在没有歌词时显示歌曲信息
+    void DrawList(CRect rect, UiElement::ListElement* list_element, int item_height);                  //绘制播放列表
+    void DrawCurrentPlaylistIndicator(CRect rect, UiElement::PlaylistIndicator* playlist_indicator);      //绘制当前播放列表指示
     /**
      * @brief   绘制stackElement的指示器
      * @param   UIButton indicator 指示器信息
@@ -236,17 +265,18 @@ protected:
      */
     void DrawStackIndicator(UIButton indicator, int num, int index);
     void DrawUiMenuBar(CRect rect);
+    void DrawNavigationBar(CRect rect, UiElement::NavigationBar* tab_element);
+    void DrawMiniSpectrum(CRect rect);      //绘制图标大小的迷你频谱
 
     // 实际绘制一个图标
     void DrawUiIcon(const CRect& rect, IconMgr::IconType icon_type, IconMgr::IconStyle icon_style = IconMgr::IconStyle::IS_Auto, IconMgr::IconSize icon_size = IconMgr::IconSize::IS_DPI_16);
     // 绘制一个UI按钮 (使用GetBtnIconType取得的图标)
-    void DrawUIButton(const CRect& rect, BtnKey key_type, bool big_icon = false);
+    void DrawUIButton(const CRect& rect, BtnKey key_type, bool big_icon = false, bool show_text = false, int font_size = 9, bool checked = false);
+    void DrawUIButton(const CRect& rect, UIButton& btn, IconMgr::IconType icon_type, bool big_icon = false, const std::wstring& text = std::wstring(), int font_size = 9, bool checked = false);
     // 绘制一个工具条按钮（将rect四面缩小 DPI(2) 后调用DrawUIButton）
     void DrawControlBarBtn(CRect rect, BtnKey btn_type);
     // 绘制一个UI按钮，以text文本作为图标
-    void DrawTextButton(CRect rect, BtnKey btn_type, LPCTSTR text, bool back_color = false);
-
-    void ResetDrawArea();
+    void DrawTextButton(CRect rect, BtnKey btn_type, LPCTSTR text, bool checked = false);
 
     virtual void AddMouseToolTip(BtnKey btn, LPCTSTR str);      //为一个按钮添加鼠标提示
     virtual void UpdateMouseToolTip(BtnKey btn, LPCTSTR str);
@@ -330,4 +360,34 @@ private:
     CBitmap m_mem_bitmap_static;
 
     bool m_need_update_tooltip_pos{ false };   //是否需要更新鼠标提示
+};
+
+//用于在UI中设置字体。
+//在需要设置字体时，创建此类的一个局部对象，它会在构造时设置字体，并在析构时恢复原来的字体
+class UiFontGuard
+{
+public:
+    UiFontGuard(CPlayerUIBase* _ui, int font_size)
+        : ui(_ui)
+    {
+        if (ui != nullptr)
+        {
+            bool big_font{ ui->m_ui_data.full_screen && ui->IsDrawLargeIcon() };
+            //设置字体
+            old_font = ui->m_draw.SetFont(&theApp.m_font_set.GetFontBySize(font_size).GetFont(big_font));
+        }
+    }
+    ~UiFontGuard()
+    {
+        if (ui != nullptr)
+        {
+            //恢复原来的字体
+            if (old_font != nullptr)
+                ui->m_draw.SetFont(old_font);
+        }
+    }
+
+private:
+    CFont* old_font{};
+    CPlayerUIBase* ui{};
 };

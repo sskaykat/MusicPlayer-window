@@ -11,6 +11,7 @@
 #include "TagLibHelper.h"
 #include "Player.h"
 #include "CueFile.h"
+#include "MusicPlayer2.h"
 
 CTest::CTest()
 {
@@ -51,7 +52,9 @@ void CTest::Test()
     //TestRating();
 
     //TestCueSave();
-    TestFilePathHelper();
+    //TestFilePathHelper();
+    //TestStringToInt();
+    TestChinesePingyinMatch();
 }
 
 void CTest::TestStringMatch()
@@ -245,4 +248,29 @@ void CTest::TestFilePathHelper()
     ASSERT(file_name_whthout_extension == L"efg");
     ASSERT(file_dir == L"C:\\abc.d\\");
     ASSERT(folder_name == L"abc.d");
+}
+
+void CTest::TestStringToInt()
+{
+    wstring str1 = L"abc0234ttyyhh";
+    int n1 = CCommon::StringToInt(str1);
+    ASSERT(n1 == 234);
+    wstring str2 = L"abc056";
+    int n2 = CCommon::StringToInt(str2);
+    ASSERT(n2 == 56);
+    wstring str3 = L"876rrtyhfg345hg";
+    int n3 = CCommon::StringToInt(str3);
+    ASSERT(n3 == 876);
+    wstring str4 = L"sdfoeoirglksf6";
+    int n4 = CCommon::StringToInt(str4);
+    ASSERT(n4 == 6);
+}
+
+void CTest::TestChinesePingyinMatch()
+{
+    ASSERT(theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(L"nh", L"你好世界"));
+    ASSERT(theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(L"nhsj", L"你好世界"));
+    ASSERT(theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(L"nihaoshijie", L"你好世界"));
+    ASSERT(!theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(L"nh", L"你世界"));
+    ASSERT(theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(L"cxqd", L"春夏秋冬"));
 }

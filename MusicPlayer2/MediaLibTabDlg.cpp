@@ -48,6 +48,13 @@ void CMediaLibTabDlg::GetSongsSelected(std::vector<SongInfo>& song_list) const
     }
 }
 
+void CMediaLibTabDlg::OnTabEntered()
+{
+    //默认将“播放选中”禁用
+    CWnd* pParent = GetParentWindow();
+    ::SendMessage(pParent->GetSafeHwnd(), WM_PLAY_SELECTED_BTN_ENABLE, 0, 0);
+}
+
 bool CMediaLibTabDlg::_OnAddToNewPlaylist(std::wstring& playlist_path)
 {
     auto getSongList = [&](std::vector<SongInfo>& song_list)
@@ -86,10 +93,29 @@ void CMediaLibTabDlg::OnOK()
     if (!songs.empty())
     {
         bool ok{};
-        if (songs.size() > 1 || CFilePathHelper(songs[0].file_path).GetFileExtension() == L"cue")   // 为兼容可存在.cue文件的旧媒体库保留
-            ok = CPlayer::GetInstance().OpenSongsInTempPlaylist(songs);
+        CMediaClassifier::ClassificationType type = GetClassificationType();
+        wstring item_name = GetClassificationItemName();
+        if (type != CMediaClassifier::CT_NONE && item_name != STR_OTHER_CLASSIFY_TYPE)
+        {
+            int item_selected = GetItemSelected();
+            //右侧选中了曲目，则播放选中的曲目
+            if (item_selected >= 0)
+                ok = CPlayer::GetInstance().SetMediaLibPlaylist(type, item_name, -1, songs.front(), true, true);
+            //右侧没有选中曲目，则不指定播放曲目（继续播放上次播放的曲目）
+            else
+                ok = CPlayer::GetInstance().SetMediaLibPlaylist(type, item_name, -1, SongInfo(), true, true);
+        }
         else
-            ok = CPlayer::GetInstance().OpenSongsInTempPlaylist(GetSongList(), GetItemSelected());
+        {
+            if (songs.size() > 1 || CFilePathHelper(songs[0].file_path).GetFileExtension() == L"cue")   // 为兼容可存在.cue文件的旧媒体库保留
+            {
+                ok = CPlayer::GetInstance().OpenSongsInTempPlaylist(songs);
+            }
+            else
+            {
+                ok = CPlayer::GetInstance().OpenSongsInTempPlaylist(GetSongList(), GetItemSelected());
+            }
+        }
         if (!ok)
         {
             const wstring& info = theApp.m_str_table.LoadText(L"MSG_WAIT_AND_RETRY");
@@ -130,6 +156,17 @@ BOOL CMediaLibTabDlg::OnCommand(WPARAM wParam, LPARAM lParam)
     //响应播放列表右键菜单中的“添加到播放列表”
     CMusicPlayerCmdHelper cmd_helper;
     cmd_helper.OnAddToPlaylistCommand(getSelectedItems, command);
+
+    //响应右键菜单中的分级
+    if ((command >= ID_RATING_1 && command <= ID_RATING_5) || command == ID_RATING_NONE)    //如果命令是歌曲分级（应确保分级命令的ID是连续的）
+    {
+        std::vector<SongInfo> songs_selected;
+        GetSongsSelected(songs_selected);
+        for (const auto& song : songs_selected)
+        {
+            cmd_helper.OnRating(song, command);
+        }
+    }
 
     return CTabDlg::OnCommand(wParam, lParam);
 }

@@ -3,6 +3,7 @@
 #include "MusicPlayer2.h"
 #include "Playlist.h"
 #include "FilePathHelper.h"
+#include "Player.h"
 
 CPlaylistMgr CPlaylistMgr::m_instance;
 
@@ -29,6 +30,7 @@ void CPlaylistMgr::Init()
 
 void CPlaylistMgr::EmplacePlaylist(const wstring& path, int track, int pos, int track_num, int total_time, unsigned __int64 last_played_time)
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     if (path == m_default_playlist.path)
     {
         m_default_playlist.position = pos;
@@ -57,11 +59,9 @@ void CPlaylistMgr::EmplacePlaylist(const wstring& path, int track, int pos, int 
         return;
     }
 
-    for (size_t i{ 0 }; i < m_recent_playlists.size(); i++)
-    {
-        if (path == m_recent_playlists[i].path)
-            m_recent_playlists.erase(m_recent_playlists.begin() + i);   // 如果当前路径已经在最近路径中，就把它最近路径中删除
-    }
+    auto iter = std::find_if(m_recent_playlists.begin(), m_recent_playlists.end(), [&](const PlaylistInfo& playlist_info) {
+        return playlist_info.path == path;
+    });
     PlaylistInfo playlist_info;
     playlist_info.path = path;
     playlist_info.track = track;
@@ -69,21 +69,39 @@ void CPlaylistMgr::EmplacePlaylist(const wstring& path, int track, int pos, int 
     playlist_info.track_num = track_num;
     playlist_info.total_time = total_time;
     playlist_info.last_played_time = last_played_time;
-    m_recent_playlists.push_front(playlist_info);                       // 当前路径插入到m_recent_playlists的前面
+
+    if (iter != m_recent_playlists.end())
+    {
+        playlist_info.create_time = iter->create_time;
+        *iter = playlist_info;
+    }
+    else
+    {
+        m_recent_playlists.push_front(playlist_info);
+    }
+
+    //更新列表顺序
+    SortPlaylist();
 }
 
 void CPlaylistMgr::AddNewPlaylist(const wstring& path)
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     PlaylistInfo playlist_info{};
     playlist_info.path = path;
+    playlist_info.create_time = CCommon::GetCurTimeElapse();
+    playlist_info.last_played_time = playlist_info.create_time;
     m_recent_playlists.push_front(playlist_info);
-    playlist_info.last_played_time = CCommon::GetCurTimeElapse();
     CPlaylistFile playlist;
     playlist.SaveToFile(path);      //创建空的播放列表文件
+
+    //更新列表顺序
+    SortPlaylist();
 }
 
 bool CPlaylistMgr::DeletePlaylist(const wstring& path)
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     if (path == m_temp_playlist.path)
     {
         m_temp_playlist.track_num = 0;
@@ -107,11 +125,13 @@ bool CPlaylistMgr::DeletePlaylist(const wstring& path)
 void CPlaylistMgr::UpdateCurrentPlaylistType(const wstring& path)
 {
     if (path.empty()) return;
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     m_cur_playlist_type = GetPlaylistType(path);
 }
 
 void CPlaylistMgr::UpdatePlaylistInfo(PlaylistInfo playlist_info)
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     PlaylistType type = GetPlaylistType(playlist_info.path);
     switch (type)
     {
@@ -149,10 +169,11 @@ void CPlaylistMgr::SavePlaylistData()
     {
         return;
     }
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     // 构造CArchive对象
     CArchive ar(&file, CArchive::store);
     // 写数据
-    ar << 4;        //写入数据文件版本
+    ar << 5;        //写入数据文件版本
 
     ar << static_cast<int>(m_cur_playlist_type);
     //写入默认播放列表信息
@@ -189,6 +210,7 @@ void CPlaylistMgr::SavePlaylistData()
             << path_info.track_num
             << path_info.total_time
             << path_info.last_played_time
+            << path_info.create_time            //由于特殊的播放列表无法手动创建，因此不需要保存create_time
             ;
     }
     // 关闭CArchive对象
@@ -200,6 +222,7 @@ void CPlaylistMgr::SavePlaylistData()
 
 void CPlaylistMgr::LoadPlaylistData()
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     m_recent_playlists.clear();
     std::vector<PlaylistInfo> playlist_info_vect;       //从数据获取到的播放列表信息
 
@@ -263,6 +286,15 @@ void CPlaylistMgr::LoadPlaylistData()
             ar >> path_info.total_time;
             if (version >= 4)
                 ar >> path_info.last_played_time;
+            if (version >= 5)
+                ar >> path_info.create_time;
+            unsigned __int64 cur_time = CCommon::GetCurTimeElapse();
+            if (path_info.create_time == 0 || path_info.create_time > cur_time)     //创建时间不能超过当前时间
+            {
+                unsigned __int64 file_last_modified_time{};
+                CCommon::GetFileLastModified(path_info.path, file_last_modified_time);     //没有读取到创建时间，则将文件修改时间
+                path_info.create_time = CCommon::FileTimeToTimeT(file_last_modified_time);
+            }
 
             playlist_info_vect.push_back(path_info);
         }
@@ -306,12 +338,18 @@ void CPlaylistMgr::LoadPlaylistData()
 
         PlaylistInfo path_info;
         path_info.path = path_helper.GetFilePath();
+        unsigned __int64 file_last_modified_time{};
+        CCommon::GetFileLastModified(path_info.path, file_last_modified_time);     //没有读取到创建时间，则将文件修改时间
+        path_info.create_time = CCommon::FileTimeToTimeT(file_last_modified_time);
         m_recent_playlists.push_back(path_info);
     }
+
+    SortPlaylist();
 }
 
 PlaylistInfo CPlaylistMgr::FindPlaylistInfo(const wstring& str) const
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     if (m_default_playlist.path.find(str) != wstring::npos)
     {
         return m_default_playlist;
@@ -339,20 +377,39 @@ PlaylistInfo CPlaylistMgr::FindPlaylistInfo(const wstring& str) const
 
 PlaylistInfo CPlaylistMgr::GetCurrentPlaylistInfo() const
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     if (m_cur_playlist_type == PT_DEFAULT)
+    {
         return m_default_playlist;
+    }
     else if (m_cur_playlist_type == PT_FAVOURITE)
+    {
         return m_favourite_playlist;
+    }
     else if (m_cur_playlist_type == PT_TEMP)
+    {
         return m_temp_playlist;
+    }
     else if (m_recent_playlists.empty())    // m_recent_playlists为空时返回默认播放列表)
+    {
         return m_default_playlist;
+    }
     else
-        return m_recent_playlists.front();
+    {
+        //查找播放时间最近的播放列表
+        PlaylistInfo latest_playlist{ m_recent_playlists.front() };
+        for (const auto& playlist_info : m_recent_playlists)
+        {
+            if (playlist_info.last_played_time > latest_playlist.last_played_time)
+                latest_playlist = playlist_info;
+        }
+        return latest_playlist;
+    }
 }
 
 PlaylistType CPlaylistMgr::GetPlaylistType(const wstring& path) const
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     if (path == m_default_playlist.path)
         return PT_DEFAULT;
     else if (path == m_favourite_playlist.path)
@@ -365,6 +422,7 @@ PlaylistType CPlaylistMgr::GetPlaylistType(const wstring& path) const
 
 void CPlaylistMgr::RenamePlaylist(const wstring& old_path, const wstring& new_path)
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     auto iter = std::find_if(m_recent_playlists.begin(), m_recent_playlists.end(),
         [&](const PlaylistInfo& playlist_info) { return playlist_info.path == old_path; });
     if (iter != m_recent_playlists.end())
@@ -373,11 +431,216 @@ void CPlaylistMgr::RenamePlaylist(const wstring& old_path, const wstring& new_pa
 
 void CPlaylistMgr::GetAllPlaylistInfo(vector<PlaylistInfo>& playlists_info)
 {
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
     playlists_info.clear();
-    playlists_info.push_back(CPlaylistMgr::Instance().m_default_playlist);
-    playlists_info.push_back(CPlaylistMgr::Instance().m_favourite_playlist);
+    playlists_info.push_back(m_default_playlist);
+    playlists_info.push_back(m_favourite_playlist);
     std::copy(m_recent_playlists.begin(), m_recent_playlists.end(), std::back_inserter(playlists_info));
     // 只有当列表中有歌曲时才显示临时播放列表
-    if (CPlaylistMgr::Instance().m_temp_playlist.track_num > 0)
-        playlists_info.push_back(CPlaylistMgr::Instance().m_temp_playlist);
+    if (m_temp_playlist.track_num > 0)
+        playlists_info.push_back(m_temp_playlist);
+}
+
+void CPlaylistMgr::IterateItems(std::function<void(PlaylistInfo&)> func)
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    func(m_default_playlist);
+    func(m_favourite_playlist);
+    for (auto& item : m_recent_playlists)
+        func(item);
+    if (m_temp_playlist.track_num > 0)
+        func(m_temp_playlist);
+}
+
+void CPlaylistMgr::IterateItemsWithoutSpecialPlaylist(std::function<void(PlaylistInfo&)> func, int max_num)
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    int count{};
+    for (auto& item : m_recent_playlists)
+    {
+        func(item);
+        count++;
+        if (max_num > 0 && count >= max_num)
+            break;
+    }
+}
+
+int CPlaylistMgr::GetPlaylistNum() const
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    int playlist_num = m_recent_playlists.size() + SPEC_PLAYLIST_NUM;
+    if (m_temp_playlist.track_num > 0)
+        playlist_num++;
+    return playlist_num;
+}
+
+void CPlaylistMgr::GetPlaylistInfo(int index, std::function<void(const PlaylistInfo&)> func)
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    const PlaylistInfo& playlist_info{ GetPlaylistInfo(index) };
+    if (!playlist_info.path.empty())
+        func(playlist_info);
+}
+
+const PlaylistInfo& CPlaylistMgr::GetPlaylistInfo(int index)
+{
+    size_t renect_playlist_index{ size_t(index - SPEC_PLAYLIST_NUM) };
+    if (index == 0)
+        return m_default_playlist;
+    else if (index == 1)
+        return m_favourite_playlist;
+    else if (renect_playlist_index < m_recent_playlists.size())
+        return m_recent_playlists[renect_playlist_index];
+    else if (index == static_cast<int>(m_recent_playlists.size()) + SPEC_PLAYLIST_NUM && m_temp_playlist.track_num > 0)
+        return m_temp_playlist;
+
+    static PlaylistInfo empty_info;
+    return empty_info;
+}
+
+PlaylistInfo& CPlaylistMgr::GetPlaylistInfo(const wstring& path, bool& ok)
+{
+    ok = false;
+    if (path == m_default_playlist.path)
+    {
+        ok = true;
+        return m_default_playlist;
+    }
+    if (path == m_favourite_playlist.path)
+    {
+        ok = true;
+        return m_favourite_playlist;
+    }
+    if (path == m_temp_playlist.path)
+    {
+        ok = true;
+        return m_temp_playlist;
+    }
+    auto iter = std::find_if(m_recent_playlists.begin(), m_recent_playlists.end(), [path](const PlaylistInfo& item) {
+        return item.path == path;
+    });
+
+    if (iter != m_recent_playlists.end())
+    {
+        ok = true;
+        return *iter;
+    }
+    static PlaylistInfo empty_info;
+    return empty_info;
+}
+
+void CPlaylistMgr::SortPlaylist()
+{
+    if (m_recent_playlists.size() > 1)
+    {
+        switch (m_sort_mode)
+        {
+        case CPlaylistMgr::SM_RECENT_PLAYED:
+            std::stable_sort(m_recent_playlists.begin(), m_recent_playlists.end(), [](const PlaylistInfo& a, const PlaylistInfo& b) { return a.last_played_time > b.last_played_time; });
+            break;
+        case CPlaylistMgr::SM_RECENT_CREATED:
+            std::stable_sort(m_recent_playlists.begin(), m_recent_playlists.end(), [](const PlaylistInfo& a, const PlaylistInfo& b) { return a.create_time > b.create_time; });
+            break;
+        case CPlaylistMgr::SM_NAME:
+            std::stable_sort(m_recent_playlists.begin(), m_recent_playlists.end(), [](const PlaylistInfo& a, const PlaylistInfo& b) { return a.path < b.path; });
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void CPlaylistMgr::GetPlaylistInfoWithoutSpecialPlaylist(int index, std::function<void(const PlaylistInfo&)> func)
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    if (index >= 0 && index < static_cast<int>(m_recent_playlists.size()))
+        func(m_recent_playlists[index]);
+}
+
+int CPlaylistMgr::GetCurrentPlaylistIndex() const
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    if (!CPlayer::GetInstance().IsPlaylistMode())
+    {
+        return -1;
+    }
+    if (m_cur_playlist_type == PT_DEFAULT)
+    {
+        return 0;
+    }
+    else if (m_cur_playlist_type == PT_FAVOURITE)
+    {
+        return 1;
+    }
+    else if (m_cur_playlist_type == PT_TEMP)
+    {
+        return GetPlaylistNum() - 1;
+    }
+    else if (m_recent_playlists.empty())    // m_recent_playlists为空时返回默认播放列表)
+    {
+        return 0;
+    }
+    else
+    {
+        std::wstring cur_playlist_path{ CPlayer::GetInstance().GetPlaylistPath() };
+        auto iter = std::find_if(m_recent_playlists.begin(), m_recent_playlists.end(), [&](const PlaylistInfo& playlist) {
+            return playlist.path == cur_playlist_path;
+        });
+        if (iter != m_recent_playlists.end())
+            return SPEC_PLAYLIST_NUM + (iter - m_recent_playlists.begin());
+        return SPEC_PLAYLIST_NUM;
+    }
+}
+
+std::wstring CPlaylistMgr::GetPlaylistDisplayName(const std::wstring path)
+{
+    if (path.empty())
+        return std::wstring();
+
+    CFilePathHelper path_helper{ path };
+    wstring playlist_name = path_helper.GetFileName();
+    if (playlist_name == DEFAULT_PLAYLIST_NAME)
+        playlist_name = theApp.m_str_table.LoadText(L"TXT_PLAYLIST_NAME_DEFAULT");
+    else if (playlist_name == FAVOURITE_PLAYLIST_NAME)
+        playlist_name = theApp.m_str_table.LoadText(L"TXT_PLAYLIST_NAME_FAVOURITE");
+    else if (playlist_name == TEMP_PLAYLIST_NAME)
+        playlist_name = theApp.m_str_table.LoadText(L"TXT_PLAYLIST_NAME_TEMP");
+    else
+        playlist_name = path_helper.GetFileNameWithoutExtension();
+    return playlist_name;
+}
+
+bool CPlaylistMgr::ResetLastPlayedTime(const wstring& path)
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    bool ok{};
+    PlaylistInfo& playlist_info{ GetPlaylistInfo(path, ok) };
+    playlist_info.last_played_time = 0;
+    return ok;
+}
+
+bool CPlaylistMgr::UpdatePlaylistTrackNum(const wstring& path, int track_num)
+{
+    std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+    bool ok{};
+    PlaylistInfo& playlist_info{ GetPlaylistInfo(path, ok) };
+    playlist_info.track_num = track_num;
+    return ok;
+}
+
+bool CPlaylistMgr::SetSortMode(PlaylistSortMode sort_mode)
+{
+    if (m_sort_mode != sort_mode)
+    {
+        std::shared_lock<std::shared_mutex> lock(m_shared_mutex);
+        m_sort_mode = sort_mode;
+        SortPlaylist();
+        return true;
+    }
+    return false;
+}
+
+CPlaylistMgr::PlaylistSortMode CPlaylistMgr::GetSortMode() const
+{
+    return m_sort_mode;
 }

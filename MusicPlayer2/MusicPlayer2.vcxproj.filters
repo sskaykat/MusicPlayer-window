@@ -210,9 +210,6 @@
     <Filter Include="对话框类\媒体库对话框">
       <UniqueIdentifier>{a3ab564f-8af7-4267-a854-05b454587203}</UniqueIdentifier>
     </Filter>
-    <Filter Include="功能逻辑类\PlaylistMgr">
-      <UniqueIdentifier>{4dbe9b2f-faf2-46dd-8583-24b0eff0b7fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="对话框类\InputDlg">
       <UniqueIdentifier>{82bbfa03-6c20-4f56-8ad9-7bf00fcd1fe2}</UniqueIdentifier>
     </Filter>
@@ -396,11 +393,31 @@
     <Filter Include="功能逻辑类\IconMgr">
       <UniqueIdentifier>{90131507-09eb-4700-86d0-45b3402783f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="对话框类\MoreRecentItemDlg">
+      <UniqueIdentifier>{8275f9f7-1539-4d8d-a8b6-95119418eb6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="公共的类\ChinesePingyinRes">
+      <UniqueIdentifier>{66fcd09f-bfb4-43ed-9b9f-69a6eb0a32af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能逻辑类\RecentlyPlayedMgr">
+      <UniqueIdentifier>{4dbe9b2f-faf2-46dd-8583-24b0eff0b7fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="功能逻辑类\UiMediaLibItemMgr">
+      <UniqueIdentifier>{0699c691-a3ac-4f77-952c-e57b1344ba5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="对话框类\媒体库对话框\属性对话框">
+      <UniqueIdentifier>{4fb739d3-9132-4e7c-a046-8cdf7b3436e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
     <Text Include="compile_time.txt" />
-    <Text Include="res\Acknowledgement.txt" />
+    <Text Include="res\hzpy-utf8.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="res\Acknowledgement.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -632,7 +649,7 @@
       <Filter>对话框类\媒体库对话框</Filter>
     </ClInclude>
     <ClInclude Include="PlaylistMgr.h">
-      <Filter>功能逻辑类\PlaylistMgr</Filter>
+      <Filter>功能逻辑类\RecentlyPlayedMgr</Filter>
     </ClInclude>
     <ClInclude Include="RegFileRelate.h">
       <Filter>功能逻辑类\RegFileRealte</Filter>
@@ -883,6 +900,36 @@
     <ClInclude Include="IconMgr.h">
       <Filter>功能逻辑类\IconMgr</Filter>
     </ClInclude>
+    <ClInclude Include="MediaLibPlaylistMgr.h">
+      <Filter>功能逻辑类\RecentlyPlayedMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="MoreRecentItemDlg.h">
+      <Filter>对话框类\MoreRecentItemDlg</Filter>
+    </ClInclude>
+    <ClInclude Include="ChinesePingyinRes.h">
+      <Filter>公共的类\ChinesePingyinRes</Filter>
+    </ClInclude>
+    <ClInclude Include="RecentFolderMgr.h">
+      <Filter>功能逻辑类\RecentlyPlayedMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="UiMediaLibItemMgr.h">
+      <Filter>功能逻辑类\UiMediaLibItemMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="UIWindowCmdHelper.h">
+      <Filter>UIWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="SimplePropertiesDlg.h">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="PlaylistPropertiesDlg.h">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="FolderPropertiesDlg.h">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClInclude>
+    <ClInclude Include="MediaLibItemPropertiesDlg.h">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FindDlg.cpp">
@@ -1096,7 +1143,7 @@
       <Filter>对话框类\媒体库对话框</Filter>
     </ClCompile>
     <ClCompile Include="PlaylistMgr.cpp">
-      <Filter>功能逻辑类\PlaylistMgr</Filter>
+      <Filter>功能逻辑类\RecentlyPlayedMgr</Filter>
     </ClCompile>
     <ClCompile Include="RegFileRelate.cpp">
       <Filter>功能逻辑类\RegFileRealte</Filter>
@@ -1341,6 +1388,36 @@
     <ClCompile Include="IconMgr.cpp">
       <Filter>功能逻辑类\IconMgr</Filter>
     </ClCompile>
+    <ClCompile Include="MediaLibPlaylistMgr.cpp">
+      <Filter>功能逻辑类\RecentlyPlayedMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="MoreRecentItemDlg.cpp">
+      <Filter>对话框类\MoreRecentItemDlg</Filter>
+    </ClCompile>
+    <ClCompile Include="ChinesePingyinRes.cpp">
+      <Filter>公共的类\ChinesePingyinRes</Filter>
+    </ClCompile>
+    <ClCompile Include="RecentFolderMgr.cpp">
+      <Filter>功能逻辑类\RecentlyPlayedMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="UiMediaLibItemMgr.cpp">
+      <Filter>功能逻辑类\UiMediaLibItemMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="UIWindowCmdHelper.cpp">
+      <Filter>UIWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="SimplePropertiesDlg.cpp">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="PlaylistPropertiesDlg.cpp">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="FolderPropertiesDlg.cpp">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClCompile>
+    <ClCompile Include="MediaLibItemPropertiesDlg.cpp">
+      <Filter>对话框类\媒体库对话框\属性对话框</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MusicPlayer2.rc">
@@ -1365,6 +1442,9 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="language\English.ini">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\text1.bin">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
@@ -1880,6 +1960,69 @@
       <Filter>资源文件\Icons</Filter>
     </Image>
     <Image Include="res\up_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\album.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\artist.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\bitrate_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\genre.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\star_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\year.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\more_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\recent_songs.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\album_cover_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\play_in_playlist_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\reverb_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\now_playing.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\now_playing_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\karaoke_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\karaoke.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\owner_draw_titlebar_preview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\system_titlebar_preview.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\refresh.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\refresh_d.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\new_folder.ico">
+      <Filter>资源文件\Icons</Filter>
+    </Image>
+    <Image Include="res\new_folder_d.ico">
       <Filter>资源文件\Icons</Filter>
     </Image>
   </ItemGroup>

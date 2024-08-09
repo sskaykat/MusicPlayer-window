@@ -112,8 +112,10 @@ bool CAppearanceSettingDlg::InitializeControls()
 
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_APC_TITLE_BAR");
     SetDlgItemTextW(IDC_TXT_TITLE_BAR_STATIC, temp.c_str());
-    temp = theApp.m_str_table.LoadText(L"TXT_OPT_APC_USE_SYSTEM_TITLE_BAR");
-    SetDlgItemTextW(IDC_SHOW_SYSTEM_TITLEBAR_CHECK, temp.c_str());
+
+    SetDlgControlText(IDC_USE_SYSTEM_TITLEBAR_RADIO, L"TXT_OPT_APC_USE_SYSTEM_TITLE_BAR");
+    SetDlgControlText(IDC_USE_OWNER_DRAW_TITLEBAR_RADIO, L"TXT_OPT_APC_USE_OWNER_DRAW_TITLE_BAR");
+
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_APC_TITLE_BAR_BTN_SEL");
     SetDlgItemTextW(IDC_TXT_TITLE_BAR_BTN_SEL_STATIC, temp.c_str());
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_APC_TITLE_BAR_BTN_SETTING");
@@ -128,6 +130,7 @@ bool CAppearanceSettingDlg::InitializeControls()
     SetDlgItemTextW(IDC_SHOW_MINIMIZE_BTN_CHECK, temp.c_str());
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_APC_TITLE_BAR_BTN_MAXIMIZE");
     SetDlgItemTextW(IDC_SHOW_MAXIMIZE_BTN_CHECK, temp.c_str());
+    SetDlgControlText(IDC_SHOW_DARK_LIGHT_BTN_CHECK, L"TXT_OPT_APC_TITLE_BAR_BTN_DARK_KIGHT");
 
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_APC_NOTIFY_ICON");
     SetDlgItemTextW(IDC_NA_ICO_STATIC, temp.c_str());
@@ -163,6 +166,7 @@ void CAppearanceSettingDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_COLOR_STATIC5, m_color_static4);
     DDX_Control(pDX, IDC_COLOR_STATIC6, m_color_static5);
     DDX_Control(pDX, IDC_COLOR_STATIC7, m_color_static6);
+    DDX_Control(pDX, IDC_COLOR_STATIC8, m_color_static7);
     DDX_Control(pDX, IDC_FOLLOW_SYSTEM_COLOR_CHECK, m_follow_system_color_check);
     DDX_Control(pDX, IDC_SPECTRUM_HEIGHT_SLIDER, m_spectrum_height_slid);
     DDX_Control(pDX, IDC_SHOW_ALBUM_COVER_CHECK, m_show_album_cover_chk);
@@ -238,15 +242,11 @@ void CAppearanceSettingDlg::SetControlEnable()
     EnableDlgCtrl(IDC_SHOW_NEXT_CHECK, m_data.always_show_statusbar);
     EnableDlgCtrl(IDC_SHOW_FPS_CHECK, m_data.always_show_statusbar);
 
-    EnableDlgCtrl(IDC_SHOW_SETTINGS_BTN_CHECK, !m_data.show_window_frame);
-    EnableDlgCtrl(IDC_SHOW_SKIN_BTN_CHECK, !m_data.show_window_frame);
-    EnableDlgCtrl(IDC_SHOW_MINI_MODE_BTN_CHECK, !m_data.show_window_frame);
-    EnableDlgCtrl(IDC_SHOW_FULLSCREEN_BTN_CHECK, !m_data.show_window_frame);
     EnableDlgCtrl(IDC_SHOW_MINIMIZE_BTN_CHECK, !m_data.show_window_frame);
     EnableDlgCtrl(IDC_SHOW_MAXIMIZE_BTN_CHECK, !m_data.show_window_frame);
 }
 
-void CAppearanceSettingDlg::CalculateNotifyIconPreviewRect()
+void CAppearanceSettingDlg::CalculatePreviewBitmapRect()
 {
     CWnd* pStatic = GetDlgItem(IDC_PREVIEW_STATIC);
     if (pStatic != nullptr)
@@ -259,6 +259,26 @@ void CAppearanceSettingDlg::CalculateNotifyIconPreviewRect()
         m_notify_icon_preview.right = m_notify_icon_preview.left + PREVIEW_WIDTH;
         m_notify_icon_preview.bottom = m_notify_icon_preview.top + PREVIEW_HEIGHT;
     }
+
+    CWnd* use_system_titlebar_radio = GetDlgItem(IDC_USE_SYSTEM_TITLEBAR_RADIO);
+    if (use_system_titlebar_radio != nullptr)
+    {
+        ::GetWindowRect(use_system_titlebar_radio->GetSafeHwnd(), m_system_titlebar_preview_rect);
+        ScreenToClient(m_system_titlebar_preview_rect);
+        m_system_titlebar_preview_rect.bottom = m_system_titlebar_preview_rect.top - theApp.DPI(4);
+        m_system_titlebar_preview_rect.top = m_system_titlebar_preview_rect.bottom - theApp.DPI(50);
+    }
+
+    CWnd* use_owner_draw_titlebar_radio = GetDlgItem(IDC_USE_OWNER_DRAW_TITLEBAR_RADIO);
+    if (use_owner_draw_titlebar_radio != nullptr)
+    {
+        ::GetWindowRect(use_owner_draw_titlebar_radio->GetSafeHwnd(), m_owner_draw_titlebar_preview_rect);
+        ScreenToClient(m_owner_draw_titlebar_preview_rect);
+        m_owner_draw_titlebar_preview_rect.bottom = m_owner_draw_titlebar_preview_rect.top - theApp.DPI(4);
+        m_owner_draw_titlebar_preview_rect.top = m_owner_draw_titlebar_preview_rect.bottom - theApp.DPI(50);
+        m_owner_draw_titlebar_preview_rect.right = m_owner_draw_titlebar_preview_rect.left + m_system_titlebar_preview_rect.Width();
+    }
+
 }
 
 void CAppearanceSettingDlg::GetDataFromUi()
@@ -266,7 +286,7 @@ void CAppearanceSettingDlg::GetDataFromUi()
     m_data.ui_refresh_interval = m_ui_refresh_interval_edit.GetValue();
 
     m_data.always_show_statusbar = (IsDlgButtonChecked(IDC_ALWAYS_SHOW_STATUSBAR_CHECK) != 0);
-    m_data.show_window_frame = (IsDlgButtonChecked(IDC_SHOW_SYSTEM_TITLEBAR_CHECK) != 0);
+    m_data.show_window_frame = (IsDlgButtonChecked(IDC_USE_SYSTEM_TITLEBAR_RADIO) != 0);
 
     m_data.show_settings_btn_in_titlebar = (IsDlgButtonChecked(IDC_SHOW_SETTINGS_BTN_CHECK) != 0);
     m_data.show_skin_btn_in_titlebar = (IsDlgButtonChecked(IDC_SHOW_SKIN_BTN_CHECK) != 0);
@@ -274,6 +294,7 @@ void CAppearanceSettingDlg::GetDataFromUi()
     m_data.show_fullscreen_btn_in_titlebar = (IsDlgButtonChecked(IDC_SHOW_FULLSCREEN_BTN_CHECK) != 0);
     m_data.show_minimize_btn_in_titlebar = (IsDlgButtonChecked(IDC_SHOW_MINIMIZE_BTN_CHECK) != 0);
     m_data.show_maximize_btn_in_titlebar = (IsDlgButtonChecked(IDC_SHOW_MAXIMIZE_BTN_CHECK) != 0);
+    m_data.show_dark_light_btn_in_titlebar = (IsDlgButtonChecked(IDC_SHOW_DARK_LIGHT_BTN_CHECK) != 0);
 }
 
 void CAppearanceSettingDlg::ApplyDataToUi()
@@ -290,6 +311,7 @@ void CAppearanceSettingDlg::DrawColor()
     m_color_static4.SetFillColor(m_color4);
     m_color_static5.SetFillColor(m_color5);
     m_color_static6.SetFillColor(m_color6);
+    m_color_static7.SetFillColor(m_color7);
 }
 
 
@@ -303,6 +325,7 @@ BEGIN_MESSAGE_MAP(CAppearanceSettingDlg, CTabDlg)
     ON_STN_CLICKED(IDC_COLOR_STATIC5, &CAppearanceSettingDlg::OnStnClickedColorStatic5)
     ON_STN_CLICKED(IDC_COLOR_STATIC6, &CAppearanceSettingDlg::OnStnClickedColorStatic6)
     ON_STN_CLICKED(IDC_COLOR_STATIC7, &CAppearanceSettingDlg::OnStnClickedColorStatic7)
+    ON_STN_CLICKED(IDC_COLOR_STATIC8, &CAppearanceSettingDlg::OnStnClickedColorStatic8)
     ON_BN_CLICKED(IDC_FOLLOW_SYSTEM_COLOR_CHECK, &CAppearanceSettingDlg::OnBnClickedFollowSystemColorCheck)
     ON_BN_CLICKED(IDC_SHOW_ALBUM_COVER_CHECK, &CAppearanceSettingDlg::OnBnClickedShowAlbumCoverCheck)
     ON_CBN_SELCHANGE(IDC_ALBUM_FIT_COMBO, &CAppearanceSettingDlg::OnCbnSelchangeAlbumFitCombo)
@@ -325,8 +348,9 @@ BEGIN_MESSAGE_MAP(CAppearanceSettingDlg, CTabDlg)
     ON_BN_CLICKED(IDC_USE_DESKTOP_BACKGROUND_CHECK, &CAppearanceSettingDlg::OnBnClickedUseDesktopBackgroundCheck)
     ON_BN_CLICKED(IDC_SHOW_NEXT_CHECK, &CAppearanceSettingDlg::OnBnClickedShowNextCheck)
     ON_BN_CLICKED(IDC_SHOW_FPS_CHECK, &CAppearanceSettingDlg::OnBnClickedShowFpsCheck)
-    ON_BN_CLICKED(IDC_SHOW_SYSTEM_TITLEBAR_CHECK, &CAppearanceSettingDlg::OnBnClickedShowSystemTitlebarCheck)
     ON_BN_CLICKED(IDC_ALWAYS_SHOW_STATUSBAR_CHECK, &CAppearanceSettingDlg::OnBnClickedAlwaysShowStatusbarCheck)
+    ON_BN_CLICKED(IDC_USE_SYSTEM_TITLEBAR_RADIO, &CAppearanceSettingDlg::OnBnClickedUseSystemTitlebarRadio)
+    ON_BN_CLICKED(IDC_USE_OWNER_DRAW_TITLEBAR_RADIO, &CAppearanceSettingDlg::OnBnClickedUseOwnerDrawTitlebarRadio)
 END_MESSAGE_MAP()
 
 
@@ -359,6 +383,7 @@ BOOL CAppearanceSettingDlg::OnInitDialog()
     ::SetWindowLong(m_color_static4.GetSafeHwnd(), GWL_STYLE, dwStyle | SS_NOTIFY);
     ::SetWindowLong(m_color_static5.GetSafeHwnd(), GWL_STYLE, dwStyle | SS_NOTIFY);
     ::SetWindowLong(m_color_static6.GetSafeHwnd(), GWL_STYLE, dwStyle | SS_NOTIFY);
+    ::SetWindowLong(m_color_static7.GetSafeHwnd(), GWL_STYLE, dwStyle | SS_NOTIFY);
 
     m_toolTip.Create(this);
     m_toolTip.SetMaxTipWidth(theApp.DPI(300));
@@ -369,6 +394,7 @@ BOOL CAppearanceSettingDlg::OnInitDialog()
     m_toolTip.AddTool(&m_color_static4, theApp.m_str_table.LoadText(L"TIP_OPT_APC_COLOR_CYAN_GREEN").c_str());
     m_toolTip.AddTool(&m_color_static5, theApp.m_str_table.LoadText(L"TIP_OPT_APC_COLOR_PINK").c_str());
     m_toolTip.AddTool(&m_color_static6, theApp.m_str_table.LoadText(L"TIP_OPT_APC_COLOR_LIGHT_PURPLE").c_str());
+    m_toolTip.AddTool(&m_color_static7, theApp.m_str_table.LoadText(L"TIP_OPT_APC_COLOR_GRAY").c_str());
 
     m_toolTip.SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
@@ -445,20 +471,26 @@ BOOL CAppearanceSettingDlg::OnInitDialog()
     CheckDlgButton(IDC_SHOW_NEXT_CHECK, m_data.show_next_track);
     CheckDlgButton(IDC_SHOW_FPS_CHECK, m_data.show_fps);
 
-    CheckDlgButton(IDC_SHOW_SYSTEM_TITLEBAR_CHECK, m_data.show_window_frame);
+    if (m_data.show_window_frame)
+        CheckDlgButton(IDC_USE_SYSTEM_TITLEBAR_RADIO, TRUE);
+    else
+        CheckDlgButton(IDC_USE_OWNER_DRAW_TITLEBAR_RADIO, TRUE);
     CheckDlgButton(IDC_SHOW_SETTINGS_BTN_CHECK, m_data.show_settings_btn_in_titlebar);
     CheckDlgButton(IDC_SHOW_SKIN_BTN_CHECK, m_data.show_skin_btn_in_titlebar);
     CheckDlgButton(IDC_SHOW_MINI_MODE_BTN_CHECK, m_data.show_minimode_btn_in_titlebar);
     CheckDlgButton(IDC_SHOW_FULLSCREEN_BTN_CHECK, m_data.show_fullscreen_btn_in_titlebar);
     CheckDlgButton(IDC_SHOW_MINIMIZE_BTN_CHECK, m_data.show_minimize_btn_in_titlebar);
     CheckDlgButton(IDC_SHOW_MAXIMIZE_BTN_CHECK, m_data.show_maximize_btn_in_titlebar);
+    CheckDlgButton(IDC_SHOW_DARK_LIGHT_BTN_CHECK, m_data.show_dark_light_btn_in_titlebar);
 
     //设置通知区图标预览区域的位置
-    CalculateNotifyIconPreviewRect();
+    CalculatePreviewBitmapRect();
 
     //载入预览图
-    m_preview_dark.LoadBitmap(IDB_NOTIFY_ICON_PREVIEW);
-    m_preview_light.LoadBitmap(IDB_NOTIFY_ICON_PREVIEW_LIGHT);
+    m_preview_dark.LoadFromResource(AfxGetResourceHandle(), IDB_NOTIFY_ICON_PREVIEW);
+    m_preview_light.LoadFromResource(AfxGetResourceHandle(), IDB_NOTIFY_ICON_PREVIEW_LIGHT);
+    m_preview_system_titlebar.LoadFromResource(AfxGetResourceHandle(), IDB_SYSTEM_TITLEBAR_PREVIEW);
+    m_preview_owner_draw_titlebar.LoadFromResource(AfxGetResourceHandle(), IDB_OWNER_DRAW_TITLEBAR_PREVIEW);
 
     SetControlEnable();
 
@@ -594,6 +626,12 @@ void CAppearanceSettingDlg::OnStnClickedColorStatic7()
     ClickColor();
 }
 
+void CAppearanceSettingDlg::OnStnClickedColorStatic8()
+{
+    m_data.theme_color.original_color = m_color7;
+    ClickColor();
+}
+
 
 BOOL CAppearanceSettingDlg::PreTranslateMessage(MSG* pMsg)
 {
@@ -724,12 +762,14 @@ void CAppearanceSettingDlg::OnPaint()
                        // TODO: 在此处添加消息处理程序代码
                        // 不为绘图消息调用 CTabDlg::OnPaint()
 
-    CalculateNotifyIconPreviewRect();
+    CalculatePreviewBitmapRect();
     CDrawCommon drawer;
     drawer.Create(&dc);
-    CBitmap& bitmap{ m_data.notify_icon_selected == 2 ? m_preview_light : m_preview_dark };
+    
+    //绘制通知区图标预览图
+    CImage& image{ m_data.notify_icon_selected == 2 ? m_preview_light : m_preview_dark };
     //绘制背景
-    drawer.DrawBitmap(bitmap, m_notify_icon_preview.TopLeft(), m_notify_icon_preview.Size(), CDrawCommon::StretchMode::STRETCH);
+    drawer.DrawImage(image, m_notify_icon_preview.TopLeft(), m_notify_icon_preview.Size(), CDrawCommon::StretchMode::STRETCH);
     //绘制图标
     if (m_data.notify_icon_selected >= 0 && m_data.notify_icon_selected < MAX_NOTIFY_ICON)
     {
@@ -737,6 +777,10 @@ void CAppearanceSettingDlg::OnPaint()
             CPoint(m_notify_icon_preview.left + ICON_X, m_notify_icon_preview.top + ICON_Y),
             CSize(theApp.DPI(16), theApp.DPI(16)));
     }
+
+    //绘制标题栏预览图
+    drawer.DrawImage(m_preview_system_titlebar, m_system_titlebar_preview_rect.TopLeft(), m_system_titlebar_preview_rect.Size(), CDrawCommon::StretchMode::FIT);
+    drawer.DrawImage(m_preview_owner_draw_titlebar, m_owner_draw_titlebar_preview_rect.TopLeft(), m_owner_draw_titlebar_preview_rect.Size(), CDrawCommon::StretchMode::FIT);
 }
 
 
@@ -815,15 +859,22 @@ void CAppearanceSettingDlg::OnBnClickedShowFpsCheck()
 }
 
 
-void CAppearanceSettingDlg::OnBnClickedShowSystemTitlebarCheck()
+void CAppearanceSettingDlg::OnBnClickedAlwaysShowStatusbarCheck()
 {
-    m_data.show_window_frame = (IsDlgButtonChecked(IDC_SHOW_SYSTEM_TITLEBAR_CHECK) != 0);
+    m_data.always_show_statusbar = (IsDlgButtonChecked(IDC_ALWAYS_SHOW_STATUSBAR_CHECK) != 0);
     SetControlEnable();
 }
 
 
-void CAppearanceSettingDlg::OnBnClickedAlwaysShowStatusbarCheck()
+void CAppearanceSettingDlg::OnBnClickedUseSystemTitlebarRadio()
 {
-    m_data.always_show_statusbar = (IsDlgButtonChecked(IDC_ALWAYS_SHOW_STATUSBAR_CHECK) != 0);
+    m_data.show_window_frame = true;
+    SetControlEnable();
+}
+
+
+void CAppearanceSettingDlg::OnBnClickedUseOwnerDrawTitlebarRadio()
+{
+    m_data.show_window_frame = false;
     SetControlEnable();
 }

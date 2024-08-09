@@ -37,15 +37,20 @@ bool CAboutDlg::InitializeControls()
     temp += L" (Debug)";
 #endif
 
+    wstring time_str, hash_str;
+    CCommon::GetLastCompileTime(time_str, hash_str);
+    if (!hash_str.empty())
+        temp += L"   (" + hash_str + L")";
+
     SetDlgItemTextW(IDC_STATIC_VERSION, temp.c_str());
     temp = L"Copyright (C) 2017-" COPY_RIGHT_YEAR L" By ZhongYang\r\n";
-    temp += theApp.m_str_table.LoadTextFormat(L"TXT_ABOUTBOX_LAST_BUILD_DATE", { CCommon::GetLastCompileTime() });
+    temp += theApp.m_str_table.LoadTextFormat(L"TXT_ABOUTBOX_LAST_BUILD_DATE", { time_str });
     SetDlgItemTextW(IDC_STATIC_COPYRIGHT, temp.c_str());
     temp = theApp.m_str_table.LoadText(L"TXT_ABOUTBOX_THIRD_PARTY_LIB");
     SetDlgItemTextW(IDC_STATIC_THIRD_PARTY_LIB, temp.c_str());
     temp = theApp.m_str_table.LoadText(L"TXT_ABOUTBOX_OTHER_SOFTWARE");
     SetDlgItemTextW(IDC_STATIC_OTHER_SOFTWARE, temp.c_str());
-    temp = L"<a>" + theApp.m_str_table.LoadText(L"TXT_ABOUTBOX_CONTRACT_AUTHOR") + L"</a>";
+    temp = L"<a>" + theApp.m_str_table.LoadText(L"TXT_ABOUTBOX_CONTACT_AUTHOR") + L"</a>";
     SetDlgItemTextW(IDC_SYSLINK1, temp.c_str());
     temp = L"<a>" + theApp.m_str_table.LoadText(L"TXT_ABOUTBOX_CHECK_UPDATE") + L"</a>";
     SetDlgItemTextW(IDC_SYSLINK2, temp.c_str());
@@ -61,13 +66,12 @@ bool CAboutDlg::InitializeControls()
     SetDlgItemTextW(IDOK, temp.c_str());
 
     RepositionTextBasedControls({
-        { CtrlTextInfo::L2, IDC_SYSLINK1, CtrlTextInfo::W_50 },
-        { CtrlTextInfo::L1, IDC_SYSLINK2, CtrlTextInfo::W_50 },
-        { CtrlTextInfo::L2, IDC_GITHUB_SYSLINK, CtrlTextInfo::W_50 },
-        { CtrlTextInfo::L1, IDC_LICENSE_SYSLINK, CtrlTextInfo::W_50 },
+        { CtrlTextInfo::L3, IDC_SYSLINK1, CtrlTextInfo::W_50 },
+        { CtrlTextInfo::L2, IDC_SYSLINK2, CtrlTextInfo::W_50 },
+        { CtrlTextInfo::L1, IDC_GITHUB_SYSLINK, CtrlTextInfo::W_50 },
+        { CtrlTextInfo::L3, IDC_LICENSE_SYSLINK, CtrlTextInfo::W_50 },
         { CtrlTextInfo::L2, IDC_DONATE_SYSLINK, CtrlTextInfo::W_50 },
-        { CtrlTextInfo::L1, IDC_ACKNOWLEDGEMENT_SYSLINK, CtrlTextInfo::W_50 },
-        { CtrlTextInfo::R1, IDOK, CtrlTextInfo::W32 }
+        { CtrlTextInfo::L1, IDC_ACKNOWLEDGEMENT_SYSLINK, CtrlTextInfo::W_50 }
         });
 
     return true;
@@ -104,7 +108,7 @@ BOOL CAboutDlg::OnInitDialog()
     SetBackgroundColor(GetSysColor(COLOR_WINDOW));
 
     m_tool_tip.Create(this);
-    m_tool_tip.AddTool(GetDlgItem(IDC_SYSLINK1), (theApp.m_str_table.LoadText(L"TIP_ABOUTBOX_SEND_EMAIL_TO_ATHOUR") + L"\r\nmailto:zhongyang219@hotmail.com").c_str());
+    m_tool_tip.AddTool(GetDlgItem(IDC_SYSLINK1), (theApp.m_str_table.LoadText(L"TIP_ABOUTBOX_SEND_EMAIL_TO_AUTHOR") + L"\r\nmailto:zhongyang219@hotmail.com").c_str());
     m_tool_tip.AddTool(GetDlgItem(IDC_GITHUB_SYSLINK), (theApp.m_str_table.LoadText(L"TIP_ABOUTBOX_GOTO_GITHUB") + L"\r\nhttps://github.com/zhongyang219/MusicPlayer2").c_str());
     m_tool_tip.AddTool(GetDlgItem(IDC_SYSLINK_BASS), L"http://www.un4seen.com/bass.html");
     m_tool_tip.AddTool(GetDlgItem(IDC_SYSLINK_TAGLIB), L"http://taglib.org/");
@@ -125,9 +129,9 @@ BOOL CAboutDlg::OnInitDialog()
     if (m_rc_pic.Height() <= 0)
         m_rc_pic.bottom = m_rc_pic.top + theApp.DPI(50);
     // 计算背景白色区域高度
-    ::GetWindowRect(GetDlgItem(IDC_SYSLINK1)->GetSafeHwnd(), rect);
+    ::GetWindowRect(GetDlgItem(IDOK)->GetSafeHwnd(), rect);
     ScreenToClient(rect);
-    m_white_height = rect.top - theApp.DPI(6);
+    m_white_height = rect.top - theApp.DPI(8);
 
     //载入图片
     m_about_pic.LoadFromResource(AfxGetResourceHandle(), IDB_DEFAULT_COVER);
@@ -202,7 +206,7 @@ void CAboutDlg::OnPaint()
 
     //画背景图
     CSize img_size{ m_about_pic.GetWidth(), m_about_pic.GetHeight() };
-    draw.DrawBitmap(m_about_pic, m_rc_pic.TopLeft(), m_rc_pic.Size(), CDrawCommon::StretchMode::FILL);
+    draw.DrawImage(m_about_pic, m_rc_pic.TopLeft(), m_rc_pic.Size(), CDrawCommon::StretchMode::FILL);
 }
 
 

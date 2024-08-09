@@ -98,6 +98,11 @@ public:
         IT_Play_In_Playlist,        // 添加到新播放列表并播放
         IT_Play_In_Folder,          // 在文件夹模式中播放
         IT_Tag,                     // 标签
+        IT_More,                    // 更多
+        IT_NowPlaying,              // 正在播放
+        IT_Karaoke,                 // 歌词卡拉OK效果
+        IT_Refresh,                 // 刷新
+        IT_NewFolder,               // 添加新文件夹
 
         IT_Le_Tag_Insert,           // Le 插入时间标签
         IT_Le_Tag_Replace,          // Le 替换时间标签
@@ -143,7 +148,7 @@ public:
 
     // 获取需要的图标，不要在代码中大量直接调用
     // 请为同类调用提供一层包装以免之后修改困难
-    HICON GetHICON(IconType type, IconStyle style = IS_Auto, IconSize size = IS_DPI_16);
+    HICON GetHICON(IconType type, IconStyle style, IconSize size);
 
     static CSize GetIconSize(IconSize size)
     {

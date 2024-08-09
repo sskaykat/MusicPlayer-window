@@ -79,6 +79,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\MusicPlayer2.ico"
 
+IDI_PLAY_IN_PLAYLIST_D  ICON                    "res\\play_in_playlist_d.ico"
+
 IDI_PREVIOUS            ICON                    "res\\上一曲.ico"
 
 IDI_PLAY_PAUSE          ICON                    "res\\播放_暂停.ico"
@@ -265,7 +267,7 @@ IDI_PIN_D               ICON                    "res\\pin_d.ico"
 
 IDI_EXIT_D              ICON                    "res\\exit_d.ico"
 
-IDI_ALBUM_COVER_D       ICON                    "res\\album_cover.ico"
+IDI_ALBUM_COVER_D       ICON                    "res\\album_cover_d.ico"
 
 IDI_DARK_MODE_D         ICON                    "res\\dark_mode.ico"
 
@@ -393,6 +395,44 @@ IDI_FIX_D               ICON                    "res\\fix_d.ico"
 
 IDI_UP_D                ICON                    "res\\up_d.ico"
 
+IDI_ARTIST              ICON                    "res\\artist.ico"
+
+IDI_ALBUM               ICON                    "res\\album.ico"
+
+IDI_GENRE               ICON                    "res\\genre.ico"
+
+IDI_YEAR                ICON                    "res\\year.ico"
+
+IDI_FILE_RELATE         ICON                    "res\\file_relate.ico"
+
+IDI_BITRATE_D           ICON                    "res\\bitrate_d.ico"
+
+IDI_STAR_D              ICON                    "res\\star_d.ico"
+
+IDI_MORE_D              ICON                    "res\\more_d.ico"
+
+IDI_RECENT_SONG         ICON                    "res\\recent_songs.ico"
+
+IDI_ALBUM_COVER         ICON                    "res\\album_cover.ico"
+
+IDI_REVERB_D            ICON                    "res\\reverb_d.ico"
+
+IDI_NOW_PLAYING         ICON                    "res\\now_playing.ico"
+
+IDI_NOW_PLAYING_D       ICON                    "res\\now_playing_d.ico"
+
+IDI_KARAOKE             ICON                    "res\\karaoke.ico"
+
+IDI_KARAOKE_D           ICON                    "res\\karaoke_d.ico"
+
+IDI_REFRESH_D           ICON                    "res\\refresh_d.ico"
+
+IDI_REFRESH             ICON                    "res\\refresh.ico"
+
+IDI_NEW_FOLDER          ICON                    "res\\new_folder.ico"
+
+IDI_NEW_FOLDER_D        ICON                    "res\\new_folder_d.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -453,6 +493,10 @@ IDB_NOTIFY_ICON_PREVIEW BITMAP                  "res\\notify_preview.bmp"
 IDB_NOTIFY_ICON_PREVIEW_LIGHT BITMAP                  "res\\notify_preview_light.bmp"
 
 IDB_DEFAULT_COVER       BITMAP                  "res\\default_cover.bmp"
+
+IDB_SYSTEM_TITLEBAR_PREVIEW BITMAP                  "res\\system_titlebar_preview.bmp"
+
+IDB_OWNER_DRAW_TITLEBAR_PREVIEW BITMAP                  "res\\owner_draw_titlebar_preview.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -520,7 +564,9 @@ BEGIN
     "G",            ID_LOCATE_TO_CURRENT,   VIRTKEY, CONTROL, NOINVERT
     VK_NEXT,        ID_LYRIC_DELAY,         VIRTKEY, CONTROL, NOINVERT
     VK_PRIOR,       ID_LYRIC_FORWARD,       VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_MEDIA_LIB,           VIRTKEY, CONTROL, NOINVERT
     "M",            ID_MINI_MODE,           VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_MORE_RECENT_ITEMS,   VIRTKEY, CONTROL, NOINVERT
     VK_DOWN,        ID_MOVE_PLAYLIST_ITEM_DOWN, VIRTKEY, CONTROL, NOINVERT
     VK_UP,          ID_MOVE_PLAYLIST_ITEM_UP, VIRTKEY, CONTROL, NOINVERT
     "N",            ID_NEXT,                VIRTKEY, NOINVERT
@@ -529,6 +575,7 @@ BEGIN
     VK_RETURN,      ID_ORIGINAL_SPEED,      VIRTKEY, CONTROL, NOINVERT
     "P",            ID_PLAY_PAUSE,          VIRTKEY, NOINVERT
     VK_SPACE,       ID_PLAY_PAUSE,          VIRTKEY, NOINVERT
+    "A",            ID_PLAYLIST_SELECT_ALL, VIRTKEY, CONTROL, NOINVERT
     "V",            ID_PREVIOUS,            VIRTKEY, NOINVERT
     "Q",            ID_RE_INI_BASS,         VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      ID_REMOVE_CURRENT_FROM_PLAYLIST, VIRTKEY, CONTROL, NOINVERT
@@ -539,7 +586,6 @@ BEGIN
     "S",            ID_SAVE_MODIFIED_LYRIC, VIRTKEY, CONTROL, NOINVERT
     "A",            ID_SET_A_POINT,         VIRTKEY, SHIFT, CONTROL, NOINVERT
     "B",            ID_SET_B_POINT,         VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "T",            ID_MEDIA_LIB,           VIRTKEY, CONTROL, NOINVERT
     "Y",            ID_SHOW_DESKTOP_LYRIC,  VIRTKEY, CONTROL, NOINVERT
     "L",            ID_SHOW_PLAYLIST,       VIRTKEY, CONTROL, NOINVERT
     VK_OEM_MINUS,   ID_SLOW_DOWN,           VIRTKEY, CONTROL, NOINVERT
@@ -567,16 +613,17 @@ END
 // Dialog
 //
 
-IDD_TEST_DIALOG DIALOGEX 0, 0, 309, 176
+IDD_TEST_DIALOG DIALOGEX 0, 0, 429, 176
 STYLE DS_SETFONT | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "测试"
 FONT 9, "Segoe UI", 400, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "确定",IDOK,198,155,50,14
-    PUSHBUTTON      "取消",IDCANCEL,252,155,50,14
-    LTEXT           "这是工具栏",IDC_TEST_TOOLBAR,7,7,295,12
+    DEFPUSHBUTTON   "确定",IDOK,314,155,50,14
+    PUSHBUTTON      "取消",IDCANCEL,372,155,50,14
+    LTEXT           "这是工具栏",IDC_TEST_TOOLBAR,7,7,218,12
     LTEXT           "一个进度条",IDC_TEST_PROGRESS_BAR,7,23,44,8
     CONTROL         "",IDC_MFCEDITBROWSE1,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x80,7,42,123,12
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,229,7,193,143
 END
 
 IDD_PROPERTY_ADVANCED_DIALOG DIALOGEX 0, 0, 344, 148
@@ -599,21 +646,21 @@ IDD_MEDIA_CLASSIFY_DIALOG DIALOGEX 0, 0, 330, 170
 STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
 FONT 9, "Segoe UI", 400, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_MFCEDITBROWSE1,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x80,4,4,322,12
+    CONTROL         "",IDC_MFCEDITBROWSE1,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x80,4,4,124,12
     CONTROL         "",IDC_CLASSIFY_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,4,20,124,146
-    CONTROL         "",IDC_SONG_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,131,20,195,146
-    CONTROL         "",IDC_HSPLITER_STATIC,"Static",SS_BLACKFRAME,128,20,3,146
+    CONTROL         "",IDC_SONG_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,131,4,195,162
+    CONTROL         "",IDC_HSPLITER_STATIC,"Static",SS_BLACKFRAME,128,4,3,162
 END
 
 IDD_FOLDER_EXPLORE_DIALOG DIALOGEX 0, 0, 330, 170
 STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
 FONT 9, "Segoe UI", 400, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_MFCEDITBROWSE1,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x80,4,4,322,12
+    CONTROL         "",IDC_MFCEDITBROWSE1,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x80,4,4,121,12
     CONTROL         "",IDC_FOLDER_EXPLORE_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,4,20,121,145
-    CONTROL         "",IDC_SONG_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,128,30,198,135
-    LTEXT           "",IDC_PATH_STATIC,128,20,198,8,SS_ENDELLIPSIS
-    CONTROL         "",IDC_HSPLITER_STATIC,"Static",SS_BLACKFRAME,125,20,3,145
+    CONTROL         "",IDC_SONG_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,128,14,198,151
+    LTEXT           "",IDC_PATH_STATIC,128,4,198,8,SS_ENDELLIPSIS
+    CONTROL         "",IDC_HSPLITER_STATIC,"Static",SS_BLACKFRAME,125,4,3,161
 END
 
 IDD_ALL_MEDIA_DIALOG DIALOGEX 0, 0, 330, 170
@@ -624,7 +671,7 @@ BEGIN
     CONTROL         "",IDC_SONG_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,4,20,322,146
 END
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 222, 151
+IDD_ABOUTBOX DIALOGEX 0, 0, 222, 168
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About MusicPlayer2"
 FONT 9, "Segoe UI", 400, 0, 0x0
@@ -640,17 +687,17 @@ BEGIN
     CONTROL         "<a>TrafficMonitor</a>",IDC_SYSLINK_TRAFFICMONITOR,
                     "SysLink",WS_TABSTOP,14,103,59,8,WS_EX_TRANSPARENT
     CONTROL         "<a>SimpleNotePad</a>",IDC_SYSLINK_SIMPLENOTEPAD,"SysLink",WS_TABSTOP,82,103,60,8
-    CONTROL         "<a>Contract author</a>",IDC_SYSLINK1,"SysLink",0x0,14,119,50,8,WS_EX_TRANSPARENT
-    CONTROL         "<a>Check for update</a>",IDC_SYSLINK2,"SysLink",WS_TABSTOP,72,119,50,8
-    CONTROL         "<a>GitHub</a>",IDC_GITHUB_SYSLINK,"SysLink",WS_TABSTOP,14,129,50,8
-    CONTROL         "<a>License</a>",IDC_LICENSE_SYSLINK,"SysLink",WS_TABSTOP,72,129,50,8
-    CONTROL         "<a>Donate</a>",IDC_DONATE_SYSLINK,"SysLink",WS_TABSTOP,14,139,50,8
+    CONTROL         "<a>Contract author</a>",IDC_SYSLINK1,"SysLink",0x0,14,119,41,8,WS_EX_TRANSPARENT
+    CONTROL         "<a>Check for update</a>",IDC_SYSLINK2,"SysLink",WS_TABSTOP,59,119,39,8
+    CONTROL         "<a>GitHub</a>",IDC_GITHUB_SYSLINK,"SysLink",WS_TABSTOP,103,119,57,8
+    CONTROL         "<a>License</a>",IDC_LICENSE_SYSLINK,"SysLink",WS_TABSTOP,14,129,40,8
+    CONTROL         "<a>Donate</a>",IDC_DONATE_SYSLINK,"SysLink",WS_TABSTOP,59,129,39,8
     CONTROL         "<a>Acknowledgement</a>",IDC_ACKNOWLEDGEMENT_SYSLINK,
-                    "SysLink",WS_TABSTOP,72,139,50,8
-    DEFPUSHBUTTON   "OK",IDOK,166,132,50,14,WS_GROUP
+                    "SysLink",WS_TABSTOP,103,129,57,8
+    DEFPUSHBUTTON   "OK",IDOK,165,148,50,14,WS_GROUP
 END
 
-IDD_APPEREANCE_SETTING_DLG DIALOGEX 0, 0, 344, 578
+IDD_APPEREANCE_SETTING_DLG DIALOGEX 0, 0, 344, 624
 STYLE DS_SETFONT | WS_CHILD | WS_SYSMENU
 FONT 9, "Segoe UI", 400, 0, 0x0
 BEGIN
@@ -698,13 +745,14 @@ BEGIN
     CONTROL         "",IDC_ALBUM_COVER_PATH_EDIT,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x880,150,252,180,11
     GROUPBOX        "Theme Color",IDC_TXT_THEME_COLOR_STATIC,7,276,330,50,WS_GROUP
     LTEXT           "",IDC_COLOR_STATIC,25,291,30,13,NOT WS_GROUP,WS_EX_STATICEDGE
-    GROUPBOX        " Preset color",IDC_PRESET_COLOR_STATIC,73,283,134,27
+    GROUPBOX        " Preset color",IDC_PRESET_COLOR_STATIC,73,283,151,27
     LTEXT           "",IDC_COLOR_STATIC2,83,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "",IDC_COLOR_STATIC3,103,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "",IDC_COLOR_STATIC4,123,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "",IDC_COLOR_STATIC5,143,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "",IDC_COLOR_STATIC6,163,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "",IDC_COLOR_STATIC7,183,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "",IDC_COLOR_STATIC8,203,293,12,11,NOT WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     PUSHBUTTON      "More Color...",IDC_SET_PROGRESS_COLOR_BUTTON,260,291,70,14
     CONTROL         "Follow the system theme color",IDC_FOLLOW_SYSTEM_COLOR_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,313,180,8
@@ -713,28 +761,32 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,342,316,8
     CONTROL         "Show next track",IDC_SHOW_NEXT_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,353,126,8
     CONTROL         "Show fps",IDC_SHOW_FPS_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,353,180,8
-    GROUPBOX        "Title bar",IDC_TXT_TITLE_BAR_STATIC,7,372,330,77,WS_GROUP
-    CONTROL         "Use system standard title bar",IDC_SHOW_SYSTEM_TITLEBAR_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,383,316,8
-    LTEXT           "Buttons displayed in the title bar(only available when ""Use system standard title bar"" is not checked):",IDC_TXT_TITLE_BAR_BTN_SEL_STATIC,14,394,316,17
-    CONTROL         "Settings",IDC_SHOW_SETTINGS_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,414,126,8
-    CONTROL         "Switch UI",IDC_SHOW_SKIN_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,414,180,8
-    CONTROL         "Mini mode",IDC_SHOW_MINI_MODE_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,425,126,8
-    CONTROL         "Full screen",IDC_SHOW_FULLSCREEN_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,425,180,8
-    CONTROL         "Minimize",IDC_SHOW_MINIMIZE_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,436,126,8
-    CONTROL         "Maximize/Restore",IDC_SHOW_MAXIMIZE_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,436,180,8
-    GROUPBOX        "Notification Area Icon",IDC_NA_ICO_STATIC,7,455,330,65,WS_GROUP
-    LTEXT           "Preview:",IDC_PREVIEW_STATIC,14,467,126,8
-    LTEXT           "Select notification area icon:",IDC_TXT_NA_ICO_SEL_STATIC,150,467,180,8
-    COMBOBOX        IDC_COMBO1,150,481,100,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Title bar",IDC_TXT_TITLE_BAR_STATIC,7,372,330,111,WS_GROUP
+    CONTROL         "Use system standard title bar",IDC_USE_SYSTEM_TITLEBAR_RADIO,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,14,411,126,10
+    CONTROL         "Use self-drawn title bar",IDC_USE_OWNER_DRAW_TITLEBAR_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,150,411,180,10
+    LTEXT           "Buttons displayed in the title bar:",IDC_TXT_TITLE_BAR_BTN_SEL_STATIC,14,424,316,9
+    CONTROL         "Settings",IDC_SHOW_SETTINGS_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,434,126,8
+    CONTROL         "Switch UI",IDC_SHOW_SKIN_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,434,180,8
+    CONTROL         "Mini mode",IDC_SHOW_MINI_MODE_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,445,180,8
+    CONTROL         "Full screen",IDC_SHOW_FULLSCREEN_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,457,126,8
+    CONTROL         "Minimize",IDC_SHOW_MINIMIZE_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,457,180,8
+    CONTROL         "Maximize/Restore",IDC_SHOW_MAXIMIZE_BTN_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,469,126,8
+    GROUPBOX        "Notification Area Icon",IDC_NA_ICO_STATIC,7,489,330,65,WS_GROUP
+    LTEXT           "Preview:",IDC_PREVIEW_STATIC,14,501,126,8
+    LTEXT           "Select notification area icon:",IDC_TXT_NA_ICO_SEL_STATIC,150,501,180,8
+    COMBOBOX        IDC_COMBO1,150,515,100,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Automatically adapt to Windows 10 dark/light mode when using the monochrome icons.",IDC_NOTIFY_ICON_AUTO_ADAPT_CHECK,
-                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,498,316,18
-    GROUPBOX        "Advanced",IDC_TXT_ADV_STATIC,7,525,330,46,WS_GROUP
-    RTEXT           "Interface refresh interval (ms):",IDC_TXT_UI_INTERVAL_STATIC,14,538,126,8
-    EDITTEXT        IDC_UI_INTERVAL_EDIT,150,537,51,12,ES_AUTOHSCROLL | ES_NUMBER
-    PUSHBUTTON      "Restore Defaults",IDC_RESTORE_DEFAULT_BUTTON,260,536,70,14
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,532,316,18
+    GROUPBOX        "Advanced",IDC_TXT_ADV_STATIC,7,559,330,46,WS_GROUP
+    RTEXT           "Interface refresh interval (ms):",IDC_TXT_UI_INTERVAL_STATIC,14,572,126,8
+    EDITTEXT        IDC_UI_INTERVAL_EDIT,150,571,51,12,ES_AUTOHSCROLL | ES_NUMBER
+    PUSHBUTTON      "Restore Defaults",IDC_RESTORE_DEFAULT_BUTTON,260,570,70,14
     CONTROL         "Album covers use GDI+ drawing (higher quality but will take up more CPU resources)",IDC_DEFAULT_ALBUM_COVER_HQ,
-                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,551,316,17
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,585,316,17
+    CONTROL         "Switch to dark/light mode",IDC_SHOW_DARK_LIGHT_BTN_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,445,126,8
 END
 
 IDD_OPTIONS_DIALOG DIALOGEX 0, 0, 369, 247
@@ -748,7 +800,7 @@ BEGIN
     PUSHBUTTON      "Apply",IDC_APPLY_BUTTON,314,227,50,14
 END
 
-IDD_COVER_DOWNLOAD_DIALOG DIALOGEX 0, 0, 265, 231
+IDD_COVER_DOWNLOAD_DIALOG DIALOGEX 0, 0, 265, 225
 STYLE DS_SETFONT | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Download album cover (From NetEase cloud music)"
 FONT 9, "Segoe UI", 400, 0, 0x0
@@ -767,8 +819,8 @@ BEGIN
                     "Button",BS_AUTORADIOBUTTON,21,174,230,10
     CONTROL         "Save to album cover directory",IDC_SAVE_TO_ALBUM_FOLDER2,
                     "Button",BS_AUTORADIOBUTTON,21,186,230,10
-    DEFPUSHBUTTON   "Download selected",IDC_DOWNLOAD_SELECTED,148,210,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,208,210,50,14
+    DEFPUSHBUTTON   "Download selected",IDC_DOWNLOAD_SELECTED,148,204,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,208,204,50,14
 END
 
 IDD_DATA_SETTINGS_DIALOG DIALOGEX 0, 0, 344, 281
@@ -794,26 +846,26 @@ BEGIN
     CONTROL         "Minimize to notification area",IDC_MINIMIZE_TO_NOTIFY_RADIO,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,157,74,173,8
     CONTROL         "Exit the program",IDC_EXIT_PROGRAM_RADIO,"Button",BS_AUTORADIOBUTTON,157,86,173,8
-    GROUPBOX        "Automatic Download Settings",IDC_TXT_OPT_DATA_AUTO_DL_SETTING_STATIC,7,103,330,121
+    GROUPBOX        "Automatic Download Settings",IDC_TXT_OPT_DATA_DL_SETTING_STATIC,7,103,330,121
     CONTROL         "Automatically download when lyric is not exist",IDC_LYRIC_AUTO_DOWNLOAD_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,114,316,8
     LTEXT           "Automatically Download Lyrics Save Location:",IDC_TXT_OPT_DATA_AUTO_DL_LYRIC_SAVE_SEL_STATIC,14,125,316,8
     CONTROL         "Save to lyrics directory",IDC_SAVE_TO_LYRIC_FOLDER,
-                    "Button",BS_AUTORADIOBUTTON,21,135,119,8
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,21,135,119,8
     CONTROL         "Save to the same directory as the song",IDC_SAVE_TO_SONG_FOLDER,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,150,135,180,8
+                    "Button",BS_AUTORADIOBUTTON,150,135,180,8
     LTEXT           "Download Lyrics Translation Format:",IDC_DOWN_LOAD_LYRIC_TRANSLATION_FORMAT_STATIC,14,146,316,8
     CONTROL         "Lyric text and translation in the &same line",IDC_LYRIC_AND_TRANSLATION_IN_SAME_LINE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,21,156,309,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,21,156,309,10
     CONTROL         "Lyric text and translation in &different lines with the same time tag",IDC_LYRIC_AND_TRANSLATION_IN_DIFFERENT_LINE_RADIO,
                     "Button",BS_AUTORADIOBUTTON,21,167,309,10
     CONTROL         "Automatically download when album cover is not exist",IDC_COVER_AUTO_DOWNLOAD_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,179,316,8
     LTEXT           "Automatically Download Album Cover Save Location:",IDC_TXT_OPT_DATA_AUTO_DL_COVER_SAVE_SEL_STATIC,14,189,316,8
-    CONTROL         "Save to the same directory as the song",IDC_SAVE_TO_SONG_FOLDER3,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,150,200,180,8
     CONTROL         "Save to album cover directory",IDC_SAVE_TO_ALBUM_FOLDER3,
-                    "Button",BS_AUTORADIOBUTTON,21,200,119,8
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,21,200,119,8
+    CONTROL         "Save to the same directory as the song",IDC_SAVE_TO_SONG_FOLDER3,
+                    "Button",BS_AUTORADIOBUTTON,150,200,180,8
     CONTROL         "Download automatically only when the song information is complete",IDC_DOWNLOAD_WHEN_TAG_FULL_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,211,316,8
     GROUPBOX        "MIDI Setting",IDC_TXT_OPT_DATA_MIDI_SETTING_STATIC,7,229,330,39
@@ -1036,7 +1088,7 @@ BEGIN
     CONTROL         "Hide lyrics window when paused",IDC_HIDE_LYRIC_PAUSE_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,162,180,8
     CONTROL         "Lyrics background penetrate",IDC_HIDE_LYRIC_WITHOUT_LYRIC_CHECK3,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,150,180,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,186,180,8
     CONTROL         "Show unlock button when locked",IDC_SHOW_UNLOCK_WHEN_LOCKED,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,150,174,180,8
     CONTROL         "Lyrics displayed in double line",IDC_LYRIC_DOUBLE_LINE_CHECK2,
@@ -1246,10 +1298,11 @@ EXSTYLE WS_EX_APPWINDOW
 FONT 9, "Segoe UI", 400, 0, 0x0
 BEGIN
     LTEXT           "Current folder:",IDC_TXT_LIB_PATH_CURRENT_FOLDER_STATIC,4,7,30,8,SS_ENDELLIPSIS
-    PUSHBUTTON      "Open New Folder...",IDC_OPEN_FOLDER,276,4,50,14
-    EDITTEXT        IDC_PATH_EDIT,39,5,233,12,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Open New Folder...",IDC_OPEN_FOLDER,232,4,50,14
+    EDITTEXT        IDC_PATH_EDIT,39,5,189,12,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "",IDC_PATH_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,4,38,322,128
     CONTROL         "",IDC_SEARCH_EDIT,"MfcEditBrowse",WS_BORDER | WS_TABSTOP | 0x80,4,22,322,12
+    PUSHBUTTON      "Sort by",IDC_SORT_BUTTON,286,4,40,14
 END
 
 IDD_SOUND_EFFECT_DIALOG DIALOGEX 0, 0, 316, 153
@@ -1365,6 +1418,7 @@ BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,4,22,160,144
     CONTROL         "",IDC_SONG_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,167,22,159,144
     CONTROL         "",IDC_HSPLITER_STATIC,"Static",SS_BLACKFRAME,164,22,3,144
+    PUSHBUTTON      "Sort by",IDC_SORT_BUTTON,57,4,40,14
 END
 
 IDD_FILE_RELATE_DIALOG DIALOGEX 0, 0, 305, 182
@@ -1596,7 +1650,7 @@ BEGIN
     IDD_TEST_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 302
+        RIGHTMARGIN, 422
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
     END
@@ -1647,7 +1701,7 @@ BEGIN
         VERTGUIDE, 14
         VERTGUIDE, 208
         TOPMARGIN, 7
-        BOTTOMMARGIN, 148
+        BOTTOMMARGIN, 162
     END
 
     IDD_APPEREANCE_SETTING_DLG, DIALOG
@@ -1661,7 +1715,7 @@ BEGIN
         VERTGUIDE, 260
         VERTGUIDE, 330
         TOPMARGIN, 4
-        BOTTOMMARGIN, 571
+        BOTTOMMARGIN, 617
     END
 
     IDD_OPTIONS_DIALOG, DIALOG
@@ -1682,7 +1736,7 @@ BEGIN
         VERTGUIDE, 208
         VERTGUIDE, 251
         TOPMARGIN, 7
-        BOTTOMMARGIN, 224
+        BOTTOMMARGIN, 218
     END
 
     IDD_DATA_SETTINGS_DIALOG, DIALOG
@@ -2075,6 +2129,7 @@ BEGIN
     100, 100, 0, 0,
     0, 0, 100, 0,
     0, 0, 0, 0,
+    0, 0, 0, 0,
     0, 0, 0, 0
 END
 
@@ -2092,7 +2147,7 @@ END
 IDD_MEDIA_CLASSIFY_DIALOG AFX_DIALOG_LAYOUT
 BEGIN
     0,
-    0, 0, 100, 0,
+    0, 0, 20, 0,
     0, 0, 20, 100,
     20, 0, 80, 100,
     20, 0, 0, 100
@@ -2101,7 +2156,7 @@ END
 IDD_FOLDER_EXPLORE_DIALOG AFX_DIALOG_LAYOUT
 BEGIN
     0,
-    0, 0, 100, 0,
+    0, 0, 20, 0,
     0, 0, 20, 100,
     20, 0, 80, 100,
     20, 0, 80, 0,
@@ -2167,6 +2222,7 @@ BEGIN
     0, 0, 0, 0,
     0, 0, 0, 0,
     0, 0, 0, 0,
+    0, 0, 0, 0,
     80, 0, 20, 0,
     0, 0, 60, 0,
     0, 0, 100, 0,
@@ -2174,14 +2230,15 @@ BEGIN
     0, 0, 40, 0,
     40, 0, 60, 0,
     0, 0, 100, 0,
+    0, 0, 40, 0,
+    40, 0, 60, 0,
     0, 0, 100, 0,
-    0, 0, 100, 0,
     0, 0, 40, 0,
+    40, 0, 60, 0,
     40, 0, 60, 0,
     0, 0, 40, 0,
     40, 0, 60, 0,
     0, 0, 40, 0,
-    40, 0, 60, 0,
     0, 0, 100, 0,
     0, 0, 40, 0,
     40, 0, 60, 0,
@@ -2191,7 +2248,8 @@ BEGIN
     0, 0, 40, 0,
     40, 0, 0, 0,
     80, 0, 20, 0,
-    0, 0, 100, 0
+    0, 0, 100, 0,
+    0, 0, 40, 0
 END
 
 IDD_OPTIONS_DIALOG AFX_DIALOG_LAYOUT
@@ -2250,8 +2308,8 @@ BEGIN
     0, 0, 100, 0,
     0, 0, 100, 0,
     0, 0, 100, 0,
-    44, 0, 56, 0,
     0, 0, 44, 0,
+    44, 0, 56, 0,
     0, 0, 100, 0,
     0, 0, 100, 0,
     0, 0, 100, 0,
@@ -2547,7 +2605,8 @@ BEGIN
     100, 0, 0, 0,
     0, 0, 100, 0,
     0, 0, 100, 100,
-    0, 0, 100, 0
+    0, 0, 100, 0,
+    100, 0, 0, 0
 END
 
 IDD_SOUND_EFFECT_DIALOG AFX_DIALOG_LAYOUT
@@ -2630,7 +2689,8 @@ BEGIN
     100, 0, 0, 0,
     0, 0, 30, 100,
     30, 0, 70, 100,
-    30, 0, 0, 100
+    30, 0, 0, 100,
+    0, 0, 0, 0
 END
 
 IDD_FILE_RELATE_DIALOG AFX_DIALOG_LAYOUT
@@ -2942,6 +3002,8 @@ IDR_MINI_UI0            TEXT                    "skins\\miniMode\\miniMode00.xml
 IDR_ACKNOWLEDGEMENT     TEXT                    "res\\Acknowledgement.txt"
 
 IDR_STRING_TABLE        TEXT                    "language\\English.ini"
+
+IDR_CHINESE_PINGYIN     TEXT                    "res\\hzpy-utf8.txt"
 
 #endif    // 英语(美国) resources
 /////////////////////////////////////////////////////////////////////////////

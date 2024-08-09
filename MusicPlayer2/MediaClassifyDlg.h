@@ -23,7 +23,7 @@ public:
 
 public:
     void RefreshData();
-    bool SetLeftListSel(const wstring& item);
+    bool SetLeftListSel(wstring item);
 
 protected:
     enum SongColumeIndex
@@ -86,6 +86,8 @@ protected:
     virtual void AfterDeleteFromDisk(const std::vector<SongInfo>& files) override;
     virtual wstring GetSelectedString() const override;
     virtual wstring GetNewPlaylistName() const override;
+    virtual CMediaClassifier::ClassificationType GetClassificationType() const override;
+    virtual std::wstring GetClassificationItemName() const override;
 
     virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 

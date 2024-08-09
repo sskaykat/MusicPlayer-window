@@ -13,6 +13,7 @@
 #include "MusicPlayerCmdHelper.h"
 #include "SongDataManager.h"
 #include "PlaylistMgr.h"
+#include "UiMediaLibItemMgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -98,6 +99,7 @@ BOOL CMusicPlayerApp::InitInstance()
     m_song_data_path = m_config_dir + L"song_data.dat";
     m_recent_path_dat_path = m_config_dir + L"recent_path.dat";
     m_recent_playlist_data_path = m_config_dir + L"playlist\\recent_playlist.dat";
+    m_recent_medialib_playlist_path = m_config_dir + L"recent_medialib_item.dat";
     m_desktop_path = CCommon::GetDesktopPath();
     m_lastfm_path = m_config_dir + L"lastfm.dat";
     m_ui_data_path = m_config_dir + L"user_ui.dat";
@@ -204,7 +206,7 @@ BOOL CMusicPlayerApp::InitInstance()
                 LoadConfig();
                 m_str_table.Init(m_local_dir + L"language\\", m_general_setting_data.language_);
                 CCommon::SetThreadLanguageList(m_str_table.GetLanguageTag());
-                const wstring& info = theApp.m_str_table.LoadText(L"MSG_APP_RUNING_INFO");
+                const wstring& info = theApp.m_str_table.LoadText(L"MSG_APP_RUNNING_INFO");
                 AfxMessageBox(info.c_str(), MB_ICONINFORMATION | MB_OK);
             }
             return FALSE;		//退出当前程序
@@ -290,6 +292,7 @@ BOOL CMusicPlayerApp::InitInstance()
 
     m_hScintillaModule = LoadLibrary(_T("SciLexer.dll"));
     m_accelerator_res.Init();
+    m_chinese_pingyin_res.Init();
 
     CMusicPlayerDlg dlg(cmd_line);
     //CMusicPlayerDlg dlg(L"\"D:\\音乐\\纯音乐\\班得瑞\\05. Chariots Of Fire 火战车.mp3\"");
@@ -637,6 +640,10 @@ void CMusicPlayerApp::StartUpdateMediaLib(bool force)
                 }
                 CMusicPlayerCmdHelper::UpdateMediaLib();
                 theApp.m_media_lib_updating = false;
+                //更新UI中我喜欢的音乐、所有曲目和媒体库项目列表
+                CUiMyFavouriteItemMgr::Instance().UpdateMyFavourite();
+                CUiAllTracksMgr::Instance().UpdateAllTracks();
+                CUiMediaLibItemMgr::Instance().Init();
                 return 0;
             }, nullptr);
     }
@@ -807,7 +814,8 @@ UINT CMusicPlayerApp::UpdateLastFMFavouriteFunProc(LPVOID lpParam) {
     auto favourite = (bool)lpParam;
     if (favourite) {
         theApp.m_lastfm.Love();
-    } else {
+    }
+    else {
         theApp.m_lastfm.Unlove();
     }
     return 0;
@@ -820,4 +828,18 @@ void CMusicPlayerApp::LastFMScrobble() {
 UINT CMusicPlayerApp::LastFMScrobbleFunProc(LPVOID lpParam) {
     theApp.m_lastfm.Scrobble();
     return 0;
+}
+
+void CMusicPlayerApp::UpdateUiMeidaLibItems()
+{
+    AfxBeginThread([](LPVOID lpParam)->UINT {
+        //如果没有设置“启动时更新媒体库”，才在这里更新Ui中所有曲目和媒体库项目列表，否则在StartUpdateMediaLib中更新
+        if (!theApp.m_media_lib_setting_data.update_media_lib_when_start_up)
+        {
+            CUiMyFavouriteItemMgr::Instance().UpdateMyFavourite();
+            CUiAllTracksMgr::Instance().UpdateAllTracks();
+            CUiMediaLibItemMgr::Instance().Init();
+        }
+        return 0;
+    }, (LPVOID)NULL);
 }

@@ -10,6 +10,8 @@
 #include "BassCore.h"
 #include "SpectralDataHelper.h"
 #include "MediaTransControls.h"
+#include "MediaLibHelper.h"
+#include "RecentFolderMgr.h"
 
 #define WM_PLAYLIST_INI_START (WM_USER+104)         // 播放列表开始加载时的消息
 #define WM_PLAYLIST_INI_COMPLATE (WM_USER+105)      // 播放列表加载完成消息
@@ -82,13 +84,14 @@ private:
     vector<SongInfo> m_playlist;        // 播放列表，储存每个音乐文件的各种信息
     wstring m_path;                     // 文件夹模式下，当前播放文件的目录
     wstring m_playlist_path;            // 当前播放列表文件的路径
+    CMediaClassifier::ClassificationType m_media_lib_playlist_type;     //播放列表模式为PM_MEDIA_LIB时的媒体库项目类型
+    wstring m_media_lib_playlist_name;  //播放列表模式为PM_MEDIA_LIB时媒体库项目的名称
 
     SongInfo m_current_song_tmp;        // 临时存储歌曲的信息并在播放列表初始化完成后查找播放
     int m_current_song_position_tmp;    // 临时存储歌曲的播放位置（m_current_song_tmp被找到才会应用）
     bool m_current_song_playing_tmp;    // 临时存储歌曲是否正在播放（m_current_song_tmp被找到才会应用）
 
     wstring m_current_file_type;
-    deque<PathInfo> m_recent_path;      //最近打开过的路径
 
     Time m_song_length;                 //正在播放的文件的长度
     Time m_current_position;            //当前播放到的位置
@@ -150,7 +153,15 @@ private:
     std::list<int> m_random_list;          //随机播放模式下的历史记录，用于回溯之前的记录
     deque<int> m_next_tracks{};       //下n首播放的歌曲，用于“下一首播放”
 
-    bool m_playlist_mode{ false };          //如果播放列表中的曲目来自播放列表文件，而不是从一个路径下搜索到的，则为true
+    //播放列表模式
+    enum PlaylistMode
+    {
+        PM_FOLDER,              //文件夹模式
+        PM_PLAYLIST,            //播放列表模式
+        PM_MEDIA_LIB            //媒体库模式
+    };
+
+    PlaylistMode m_playlist_mode{ PM_FOLDER };          //当前的播放列表模式
 
     Time m_a_repeat{};                      //AB循环中A点的时间
     Time m_b_repeat{};                      //AB循环中B点的时间
@@ -175,12 +186,8 @@ private:
     //应用一个均衡器通道的增益
     void ApplyEqualizer(int channel, int gain);
 
-    //从文件载入最近路径列表
-    void LoadRecentPath();
 public:
     void SaveCurrentPlaylist();
-    //将最近路径列表保存到文件
-    void SaveRecentPath() const;
     //退出时的处理
     void OnExit();
     //播放列表加载完毕时的处理
@@ -313,6 +320,12 @@ public:
     // 切换到此歌曲音频文件目录的文件夹模式并播放此歌曲
     bool OpenASongInFolderMode(const SongInfo& song, bool play = false);
 
+    //切换到媒体库模式
+    //play_index为-1表示按上次播放状态还原(默认为0)，如果为大于等于0的值，则视为从头播放指定曲目; play用来设置是否立即播放
+    //play_song用于指定要播放的曲目，如果指定了play_song，则忽略play_index参数
+    //force为false时列表初始化完成后会尝试执行切换播放列表时继续播放
+    bool SetMediaLibPlaylist(CMediaClassifier::ClassificationType type, const std::wstring& name, int play_index = -1, const SongInfo& play_song = SongInfo(), bool play = false, bool force = false);
+
     // 向当前播放列表添加文件，仅在播放列表模式可用，返回成功添加的数量（拒绝重复曲目）
     // 由于cue解析问题，请在判断需要“添加歌曲”而不是“添加文件”时尽量使用CPlayer::AddSongs代替此方法而不是使用path构建SongInfo
     // files内含有cue原始文件时返回值可能不正确（处理在线程函数，无法及时得知是否添加）
@@ -397,6 +410,8 @@ public:
     bool AlbumCoverExist();
     wstring GetAlbumCoverPath() const { return m_album_cover_path; }
     wstring GetAlbumCoverType() const;
+    //媒体库模式下获取当前播放媒体库项目的名称
+    wstring GetMedialibItemName() const { return m_media_lib_playlist_name; }
 
 private:
     // 下方播放列表移除歌曲方法中的共有部分
@@ -441,8 +456,6 @@ public:
     const float* GetSpectralPeakData() const { return m_spectral_peak; }
     //返回频谱分析的原始数据
     const float* GetFFTData() const { return m_fft; }
-    //返回最近播放路径列表的引用
-    deque<PathInfo>& GetRecentPath() { return m_recent_path; }
     //获取播放状态的字符串
     wstring GetPlayingState() const;
     //获取正在播放状态（0：已停止，1：已暂停，2：正在播放）
@@ -454,7 +467,9 @@ public:
     //获取下一个要播放的曲目。如果返回的是空的SongInfo对象，则说明没有下一个曲目或下一个曲目不确定
     SongInfo GetNextTrack() const;
     //为当前歌曲设置“我喜欢”标记
+    void SetFavourite(int index, bool favourite);
     void SetFavourite(bool favourite);
+    bool IsFavourite(int index);
     bool IsFavourite();
     //判断当前专辑封面是否是内嵌图片
     bool IsInnerCover() const { return m_inner_cover; }
@@ -496,7 +511,11 @@ public:
     void AlbumCoverGaussBlur();
     wstring GetCurrentFileType() { return m_current_file_type; }
     bool IsOsuFile() const;
-    bool IsPlaylistMode() const { return m_playlist_mode; }
+    bool IsPlaylistMode() const;    //是否为播放列表模式
+    bool IsFolderMode() const;      //是否为文件夹模式
+    bool IsMediaLibMode() const;    //是否为媒体库模式
+    //当前播放列表模式为PM_MEDIA_LIB时，获取当前播放的媒体库项目类型
+    CMediaClassifier::ClassificationType GetMediaLibPlaylistType() const;
     bool IsPlaylistEmpty() const;
 
     // 重命名播放列表后使用此方法更新播放实例（不会重新载入播放列表）

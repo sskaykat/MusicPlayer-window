@@ -15,7 +15,7 @@
 #include "StrTable.h"
 #include "MenuMgr.h"
 #include "IconMgr.h"
-
+#include "ChinesePingyinRes.h"
 
 // CMusicPlayerApp:
 // 有关此类的实现，请参阅 MusicPlayer2.cpp
@@ -35,6 +35,7 @@ public:
     wstring m_song_data_path;	//储存所有歌曲信息数据文件的路径
     wstring m_recent_path_dat_path;	//"recent_path.dat"文件的路径
     wstring m_recent_playlist_data_path;
+    wstring m_recent_medialib_playlist_path;
     wstring m_desktop_path;		//桌面的路径
     wstring m_module_path_reg;  //程序exe文件的路径
     //wstring m_temp_path;		//临时文件夹的路径
@@ -53,6 +54,7 @@ public:
     GlobalHotKeySettingData m_hot_key_setting_data;	//“全局快捷键”设置
     MediaLibSettingData m_media_lib_setting_data;  	//“媒体库”设置
     CAcceleratorRes m_accelerator_res;
+    CChinesePingyinRes m_chinese_pingyin_res;
 
     StrTable m_str_table;   // 实际上负责language manger
     // IconMgr比MenuMgr先构造，后析构，虽然懒加载下不是必须不过语义应当如此
@@ -128,6 +130,9 @@ public:
     void UpdateLastFMNowPlaying();
     void UpdateLastFMFavourite(bool favourite);
     void LastFMScrobble();
+
+    //更新UI中的媒体库项目
+    void UpdateUiMeidaLibItems();
 
 private:
     void LoadSongData();

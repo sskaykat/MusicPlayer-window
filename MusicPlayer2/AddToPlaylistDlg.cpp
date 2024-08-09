@@ -33,6 +33,8 @@ bool CAddToPlaylistDlg::InitializeControls()
     temp = theApp.m_str_table.LoadText(L"TITLE_ADD_TO_PLAYLIST");
     SetWindowTextW(temp.c_str());
 
+    ShowDlgCtrl(IDC_DELETE_BUTTON, false);  //隐藏“删除”按钮
+
     RepositionTextBasedControls({
         { CtrlTextInfo::R1, IDOK, CtrlTextInfo::W32 },
         { CtrlTextInfo::R2, IDCANCEL, CtrlTextInfo::W32 }
@@ -80,11 +82,10 @@ BOOL CAddToPlaylistDlg::OnInitDialog()
     m_search_edit.SetCueBanner(theApp.m_str_table.LoadText(L"TXT_SEARCH_PROMPT").c_str(), TRUE);
 
     //初始化列表
-    for (const auto& item : CPlaylistMgr::Instance().m_recent_playlists)
-    {
+    CPlaylistMgr::Instance().IterateItemsWithoutSpecialPlaylist([&](PlaylistInfo& item) {
         CFilePathHelper playlist_path{ item.path };
         m_list.push_back(playlist_path.GetFileNameWithoutExtension());
-    }
+    });
     ShowList();
 
     return TRUE;  // return TRUE unless you set the focus to a control
@@ -96,7 +97,7 @@ void CAddToPlaylistDlg::OnOK()
 {
     // TODO: 在此添加专用代码和/或调用基类
     int index = m_playlist_list_ctrl.GetCurSel();
-    m_playlist_selected = m_playlist_list_ctrl.GetItemText(index, 0);
+    m_playlist_selected = m_playlist_list_ctrl.GetItemText(index);
 
     CBaseDialog::OnOK();
 }
@@ -106,7 +107,7 @@ void CAddToPlaylistDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 {
     LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
     // TODO: 在此添加控件通知处理程序代码
-    m_playlist_selected = m_playlist_list_ctrl.GetItemText(pNMItemActivate->iItem, 0);
+    m_playlist_selected = m_playlist_list_ctrl.GetItemText(pNMItemActivate->iItem);
     CBaseDialog::OnOK();
 
     *pResult = 0;
@@ -150,7 +151,7 @@ void CAddToPlaylistDlg::QuickSearch(const wstring& key_word)
     m_search_result.clear();
     for (const auto& str : m_list)
     {
-        if (CCommon::StringFindNoCase(str, key_word) != wstring::npos)
+        if (theApp.m_chinese_pingyin_res.IsStringMatchWithPingyin(key_word, str))
         {
             m_search_result.push_back(str);
         }

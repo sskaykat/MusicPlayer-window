@@ -101,7 +101,7 @@ bool CMediaLibSettingDlg::InitializeControls()
     SetDlgItemTextW(IDC_FOLDER_EXPLORE_CHECK, temp.c_str());
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_MEDIA_LIB_PLAYLIST_OPT");
     SetDlgItemTextW(IDC_TXT_OPT_MEDIA_LIB_PLAYLIST_OPT_STATIC, temp.c_str());
-    temp = theApp.m_str_table.LoadText(L"TXT_OPT_MEDIA_LIB_DISABLE_DRAGE_SORT");
+    temp = theApp.m_str_table.LoadText(L"TXT_OPT_MEDIA_LIB_DISABLE_DRAG_SORT");
     SetDlgItemTextW(IDC_DISABLE_DRAGE_SORT_CHECK, temp.c_str());
     temp = theApp.m_str_table.LoadText(L"TXT_OPT_MEDIA_LIB_INS_BEGIN");
     SetDlgItemTextW(IDC_INSERT_BEGIN_CHECK, temp.c_str());
@@ -355,7 +355,7 @@ BOOL CMediaLibSettingDlg::OnInitDialog()
     int cur_index = m_data.write_id3_v2_3 ? 0 : 1;
     m_id3v2_type_combo.SetCurSel(cur_index);
 
-    SetButtonIcon(IDC_REFRESH_MEDIA_LIB_BUTTON, IconMgr::IconType::IT_Loop_Playlist);
+    SetButtonIcon(IDC_REFRESH_MEDIA_LIB_BUTTON, IconMgr::IconType::IT_Refresh);
 
     m_lastfm_least_perdur.SetRange(10, 90, 10);
     m_lastfm_least_perdur.SetValue(m_data.lastfm_least_perdur);
@@ -475,7 +475,10 @@ void CMediaLibSettingDlg::OnBnClickedCleanDataFileButton()
                 });
         }
         if (clear_cnt > 0)
+        {
             theApp.SaveSongData();		//清理后将数据写入文件
+            theApp.UpdateUiMeidaLibItems();     //更新UI中的媒体库显示
+        }
 
         size_t data_size = CCommon::GetFileSize(theApp.m_song_data_path);	 //清理后数据文件的大小
         int size_reduced = m_data_size - data_size;		//清理后数据文件减少的字节数
@@ -503,7 +506,7 @@ void CMediaLibSettingDlg::OnBnClickedClearRecentPlayedListBtn()
     // TODO: 在此添加控件通知处理程序代码
 
     //清除歌曲的上次播放时间
-    const wstring& info = theApp.m_str_table.LoadText(L"MSG_OPT_MEDIA_LIB_RECENT_PLAY_CLEAR_INQUARY");
+    const wstring& info = theApp.m_str_table.LoadText(L"MSG_OPT_MEDIA_LIB_RECENT_PLAY_CLEAR_INQUIRY");
     if (MessageBox(info.c_str(), NULL, MB_ICONINFORMATION | MB_YESNO) == IDYES)
     {
         CSongDataManager::GetInstance().ClearLastPlayedTime();
@@ -530,7 +533,11 @@ void CMediaLibSettingDlg::OnBnClickedRefreshMediaLibButton()
     }
     else
     {
-        theApp.StartUpdateMediaLib(true);  // 刷新媒体库按钮强制重新获取所有元数据
+        const wstring& info = theApp.m_str_table.LoadText(L"MSG_FORCE_UPDATE_MEDIA_LIB_INQUIRY");
+        if (MessageBox(info.c_str(), nullptr, MB_ICONQUESTION | MB_YESNO) == IDYES)
+        {
+            theApp.StartUpdateMediaLib(true);  // 刷新媒体库按钮强制重新获取所有元数据
+        }
     }
 }
 
@@ -547,7 +554,7 @@ void CMediaLibSettingDlg::OnBnClickedLastfmLogin() {
     if (!token.empty() && !url.empty())
     {
         ShellExecuteW(nullptr, L"open", url.c_str(), nullptr, nullptr, SW_SHOW);
-        const wstring& info = theApp.m_str_table.LoadText(L"MSG_OPT_LAST_FM_LOGIN");
+        const wstring& info = theApp.m_str_table.LoadText(L"MSG_OPT_LAST_FM_LOGIN_PROMPT");
         if (MessageBoxW(info.c_str(), NULL, MB_ICONINFORMATION | MB_OKCANCEL) == IDOK)
         {
             if (theApp.m_lastfm.GetSession(token))
@@ -558,7 +565,7 @@ void CMediaLibSettingDlg::OnBnClickedLastfmLogin() {
             }
         }
     }
-    const wstring& info = theApp.m_str_table.LoadText(L"MSG_OPT_LAST_FM_LOGIN");
+    const wstring& info = theApp.m_str_table.LoadText(L"MSG_OPT_LAST_FM_LOGIN_FAILED");
     MessageBoxW(info.c_str(), NULL, MB_ICONERROR | MB_OK);
     return;
 }

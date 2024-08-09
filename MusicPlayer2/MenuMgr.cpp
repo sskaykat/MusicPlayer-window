@@ -140,7 +140,7 @@ const CBitmap* MenuMgr::GetMenuBitmap(IconMgr::IconType icon_type)
 
     HICON hIcon = theApp.m_icon_mgr.GetHICON(icon_type, IconMgr::IS_OutlinedDark, IconMgr::IconSize::IS_DPI_16);
     // 取得默认图标尺寸（应该与GetSystemMetrics(SM_CXSMICON/SM_CYSMICON)相同）
-    auto[width, height] = IconMgr::GetIconSize(IconMgr::IconSize::IS_DPI_16);
+    auto [width, height] = IconMgr::GetIconSize(IconMgr::IconSize::IS_DPI_16);
 
     if (m_icon_bitmap_map[hIcon].GetSafeHandle())  // 已有bitmap时不再二次转换
         return &m_icon_bitmap_map[hIcon];
@@ -285,10 +285,16 @@ const wchar_t* MenuMgr::GetMenuNameStr(MenuMgr::MenuType menu_type)
         return L"LIB_SET_PATH";
     case MenuMgr::LibPlaylistMenu:
         return L"LIB_PLAYLIST";
-    case MenuMgr::LibLeftMenu:
+    case MenuMgr::LibLeftMenu: case MenuMgr::UiLibLeftMenu:
         return L"LIB_LEFT";
-    case MenuMgr::LibRightMenu:
+    case MenuMgr::LibRightMenu: case MenuMgr::UiMyFavouriteMenu: case MenuMgr::LibPlaylistRightMenu:
         return L"LIB_RIGHT";
+    case MenuMgr::UiRecentPlayedMenu:
+        return L"UI_RECENT_PLAYED";
+    case MenuMgr::LibPlaylistSortMenu:
+        return L"LIB_PLAYLIST_SORT";
+    case MenuMgr::LibFolderSortMenu:
+        return L"LIB_FOLDER_SORT";
     case MenuMgr::LeMenu:
         return L"LE";
     case MenuMgr::LeFileMenu:
@@ -512,7 +518,7 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.AppendItem(EX_ID(ID_FORMAT_CONVERT1), IconMgr::IconType::IT_Convert);
         menu.AppendItem(EX_ID(ID_CURRENT_EXPLORE_ONLINE), IconMgr::IconType::IT_Online);
         menu.AppendSeparator();
-        menu.AppendItem(EX_ID(ID_RE_INI_BASS), IconMgr::IconType::IT_Loop_Playlist);
+        menu.AppendItem(EX_ID(ID_RE_INI_BASS), IconMgr::IconType::IT_Refresh);
         menu.AppendSubMenu(MainToolCreateShortcutMenu, IconMgr::IconType::IT_Shortcut);
         menu.AppendSeparator();
         menu.AppendSubMenu(MainToolAlbumCoverMenu, IconMgr::IconType::IT_Album_Cover);
@@ -670,9 +676,10 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.AppendItem(EX_ID(ID_LYRIC_DEFAULT_STYLE3));
         break;
     case MenuMgr::RecentFolderPlaylistMenu:
-        menu.CreateMenu(true, false);
+        menu.CreateMenu(true, true);
         menu.SetUpdatePos();            // 设置Update插入点
         menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_MORE_RECENT_ITEMS), IconMgr::IconType::IT_More);
         menu.AppendItem(EX_ID(ID_MEDIA_LIB), IconMgr::IconType::IT_Media_Lib);
         break;
     case MenuMgr::PlaylistMenu:
@@ -774,8 +781,11 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.AppendItem(EX_ID(ID_DELETE_PATH), IconMgr::IconType::IT_Cancel);
         menu.AppendItem(EX_ID(ID_BROWSE_PATH), IconMgr::IconType::IT_Folder_Explore);
         menu.AppendItem(EX_ID(ID_CONTAIN_SUB_FOLDER));
+        menu.AppendSubMenu(AddToPlaylistMenu, IconMgr::IconType::IT_Add);
         menu.AppendSeparator();
         menu.AppendItem(EX_ID(ID_CLEAR_INVALID_PATH));
+        menu.AppendItem(EX_ID(ID_FILE_OPEN_FOLDER), IconMgr::IconType::IT_NewFolder);
+        menu.AppendItem(EX_ID(ID_LIB_FOLDER_PROPERTIES), IconMgr::IconType::IT_Info);
         break;
     case MenuMgr::LibPlaylistMenu:
         menu.CreateMenu(true, false);
@@ -790,6 +800,7 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.AppendItem(EX_ID(ID_PLAYLIST_FIX_PATH_ERROR), IconMgr::IconType::IT_Fix);
         menu.AppendSeparator();
         menu.AppendItem(EX_ID(ID_NEW_PLAYLIST), IconMgr::IconType::IT_Add);
+        menu.AppendItem(EX_ID(ID_LIB_PLAYLIST_PROPERTIES), IconMgr::IconType::IT_Info);
         break;
     case MenuMgr::LibLeftMenu:
         menu.CreateMenu(true, false);
@@ -809,6 +820,7 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.AppendSeparator();
         menu.AppendSubMenu(AddToPlaylistMenu, IconMgr::IconType::IT_Add);
         menu.AppendItem(EX_ID(ID_ADD_TO_NEW_PLAYLIST_AND_PLAY), IconMgr::IconType::IT_Play_In_Playlist);
+        menu.AppendSubMenu(RateMenu, IconMgr::IconType::IT_Star);
         menu.AppendSeparator();
         menu.AppendItem(EX_ID(ID_EXPLORE_ONLINE), IconMgr::IconType::IT_Online);
         menu.AppendItem(EX_ID(ID_FORMAT_CONVERT), IconMgr::IconType::IT_Convert);
@@ -817,6 +829,76 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.AppendItem(EX_ID(ID_ITEM_PROPERTY), IconMgr::IconType::IT_Info);
         menu.AppendSeparator();
         menu.AppendItem(EX_ID(ID_COPY_TEXT), IconMgr::IconType::IT_Copy);
+        break;
+    case MenuMgr::LibPlaylistRightMenu:
+        menu.CreateMenu(true, false);
+        menu.AppendItem(EX_ID(ID_PLAY_ITEM), IconMgr::IconType::IT_Play);
+        menu.SetDefaultItem();
+        menu.AppendItem(EX_ID(ID_PLAY_AS_NEXT), IconMgr::IconType::IT_Play_As_Next);
+        menu.AppendItem(EX_ID(ID_PLAY_ITEM_IN_FOLDER_MODE), IconMgr::IconType::IT_Play_In_Folder);
+        menu.AppendSeparator();
+        menu.AppendSubMenu(AddToPlaylistMenu, IconMgr::IconType::IT_Add);
+        menu.AppendItem(EX_ID(ID_ADD_TO_NEW_PLAYLIST_AND_PLAY), IconMgr::IconType::IT_Play_In_Playlist);
+        menu.AppendSubMenu(RateMenu, IconMgr::IconType::IT_Star);
+        menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_EXPLORE_ONLINE), IconMgr::IconType::IT_Online);
+        menu.AppendItem(EX_ID(ID_FORMAT_CONVERT), IconMgr::IconType::IT_Convert);
+        menu.AppendItem(EX_ID(ID_EXPLORE_TRACK), IconMgr::IconType::IT_Folder_Explore);
+        menu.AppendItem(EX_ID(ID_REMOVE_FROM_PLAYLIST), IconMgr::IconType::IT_Cancel);
+        menu.AppendItem(EX_ID(ID_DELETE_FROM_DISK));
+        menu.AppendItem(EX_ID(ID_ITEM_PROPERTY), IconMgr::IconType::IT_Info);
+        menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_COPY_TEXT), IconMgr::IconType::IT_Copy);
+        break;
+    case MenuMgr::UiLibLeftMenu:
+        menu.CreateMenu(true, false);
+        menu.AppendItem(EX_ID(ID_PLAY_ITEM), IconMgr::IconType::IT_Play);
+        menu.SetDefaultItem();
+        menu.AppendSubMenu(AddToPlaylistMenu, IconMgr::IconType::IT_Add);
+        menu.AppendItem(EX_ID(ID_ADD_TO_NEW_PLAYLIST_AND_PLAY), IconMgr::IconType::IT_Play_In_Playlist);
+        menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_COPY_TEXT), IconMgr::IconType::IT_Copy);
+        menu.AppendItem(EX_ID(ID_VIEW_IN_MEDIA_LIB), IconMgr::IconType::IT_Media_Lib);
+        break;
+    case MenuMgr::UiRecentPlayedMenu:
+        menu.CreateMenu(true, false);
+        menu.AppendItem(EX_ID(ID_PLAY_ITEM), IconMgr::IconType::IT_Play);
+        menu.SetDefaultItem();
+        menu.AppendItem(EX_ID(ID_RECENT_PLAYED_REMOVE), IconMgr::IconType::IT_Close);
+        menu.AppendItem(EX_ID(ID_COPY_TEXT), IconMgr::IconType::IT_Copy);
+        menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_VIEW_IN_MEDIA_LIB), IconMgr::IconType::IT_Media_Lib);
+        menu.AppendItem(EX_ID(ID_LIB_RECENT_PLAYED_ITEM_PROPERTIES), IconMgr::IconType::IT_Info);
+        break;
+    case MenuMgr::UiMyFavouriteMenu:
+        menu.CreateMenu(true, false);
+        menu.AppendItem(EX_ID(ID_PLAY_ITEM), IconMgr::IconType::IT_Play);
+        menu.SetDefaultItem();
+        menu.AppendItem(EX_ID(ID_PLAY_AS_NEXT), IconMgr::IconType::IT_Play_As_Next);
+        menu.AppendItem(EX_ID(ID_PLAY_ITEM_IN_FOLDER_MODE), IconMgr::IconType::IT_Play_In_Folder);
+        menu.AppendSubMenu(AddToPlaylistMenu, IconMgr::IconType::IT_Add);
+        menu.AppendSubMenu(RateMenu, IconMgr::IconType::IT_Star);
+        menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_EXPLORE_ONLINE), IconMgr::IconType::IT_Online);
+        menu.AppendItem(EX_ID(ID_FORMAT_CONVERT), IconMgr::IconType::IT_Convert);
+        menu.AppendItem(EX_ID(ID_EXPLORE_TRACK), IconMgr::IconType::IT_Folder_Explore);
+        menu.AppendItem(EX_ID(ID_REMOVE_FROM_PLAYLIST), IconMgr::IconType::IT_Cancel);
+        menu.AppendItem(EX_ID(ID_DELETE_FROM_DISK));
+        menu.AppendItem(EX_ID(ID_ITEM_PROPERTY), IconMgr::IconType::IT_Info);
+        menu.AppendSeparator();
+        menu.AppendItem(EX_ID(ID_COPY_TEXT), IconMgr::IconType::IT_Copy);
+        break;
+    case MenuMgr::LibPlaylistSortMenu:
+        menu.CreateMenu(true, false);
+        menu.AppendItem(EX_ID(ID_LIB_PLAYLIST_SORT_RECENT_PLAYED));
+        menu.AppendItem(EX_ID(ID_LIB_PLAYLIST_SORT_RECENT_CREATED));
+        menu.AppendItem(EX_ID(ID_LIB_PLAYLIST_SORT_NAME));
+        break;
+    case MenuMgr::LibFolderSortMenu:
+        menu.CreateMenu(true, false);
+        menu.AppendItem(EX_ID(ID_LIB_FOLDER_SORT_RECENT_PLAYED));
+        menu.AppendItem(EX_ID(ID_LIB_FOLDER_SORT_RECENT_ADDED));
+        menu.AppendItem(EX_ID(ID_LIB_FOLDER_SORT_PATH));
         break;
     case MenuMgr::LeMenu:
         menu.CreateMenu(false, false);
@@ -836,7 +918,7 @@ void MenuMgr::CreateMenu(MenuBase& menu)
         menu.CreateMenu(true, false);
         menu.AppendItem(EX_ID(ID_LYRIC_INSERT_TAG), IconMgr::IconType::IT_Le_Tag_Insert, L"F8");
         menu.AppendItem(EX_ID(ID_LYRIC_REPLACE_TAG), IconMgr::IconType::IT_Le_Tag_Replace, L"F9");
-        menu.AppendItem(EX_ID(ID_LYRIC_DELETE_TAG), IconMgr::IconType::IT_Le_Tag_Delete , L"Ctrl+Del");
+        menu.AppendItem(EX_ID(ID_LYRIC_DELETE_TAG), IconMgr::IconType::IT_Le_Tag_Delete, L"Ctrl+Del");
         menu.AppendSeparator();
         menu.AppendItem(EX_ID(ID_LYRIC_FIND), IconMgr::IconType::IT_Le_Find, L"Ctrl+F");
         menu.AppendItem(EX_ID(ID_LYRIC_REPLACE), IconMgr::IconType::IT_Le_Replace, L"Ctrl+H");

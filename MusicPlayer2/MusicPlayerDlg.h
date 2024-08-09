@@ -52,6 +52,10 @@ public:
     friend class CUIWindow;
     friend class CPlayerUIBase;
 
+    CUIWindow& GetUIWindow() { return m_ui_static_ctrl; }
+    bool IsMiniMode() const;
+    CMiniModeDlg* GetMinimodeDlg();
+
     // 对话框数据
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_MUSICPLAYER2_DIALOG };
@@ -99,8 +103,7 @@ protected:
     int m_window_height;	//窗口的高度
     CPoint m_desktop_lyric_pos{ -1, -1 };     //桌面歌词窗口的位置
     CSize m_desktop_lyric_size{ 0, 0 };
-    int m_part_static_playlist_width{ theApp.DPI(32) };     // 这里的值是最小宽度，窗口init时会根据文字变大
-    int m_part_static_folder_width{ theApp.DPI(32) };       // 这里的值是最小宽度，窗口init时会根据文字变大
+    int m_part_static_width{ theApp.DPI(32) };              // 这里的值是最小宽度，窗口init时会根据文字变大
     int m_medialib_btn_width{ theApp.DPI(64) };             // 这里的值是最小宽度，窗口init时会根据文字变大
 
     SLayoutData m_layout;		//窗口布局的固定数据
@@ -202,14 +205,17 @@ private:
 public:
     void ShowPlayList(bool highlight_visible = true);
     void SetMenuState(CMenu* pMenu);
-    void SetPlaylistSelected(int index);
+    void SetPlaylistSelected(const vector<int>& indexes);
     void SetUiPlaylistSelected(int index);
 
     static bool IsPointValid(CPoint);
+    static int UpdatePlaylistCtrlPosition(CWnd* pParent, CWnd* pStatic, CWnd* pEdit);     //更新播放列表上方的CStatic和CEdit控件的大小和位置，返回CStatic的宽度
+    int GetPathStaticWidth() const { return m_part_static_width; }
 
 protected:
     void SetPlayListColor(bool highlight_visible = true);
     void SwitchTrack();		//当切换正在播放的歌曲时的处理
+    void UpdateSongInfoToolTip();
     void SetPlaylistVisible();
     void SetMenubarVisible();
 
@@ -529,4 +535,5 @@ public:
     afx_msg UINT OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData);
 protected:
     afx_msg LRESULT OnSetUiForceFreshFlag(WPARAM wParam, LPARAM lParam);
+    afx_msg void OnMoreRecentItems();
 };

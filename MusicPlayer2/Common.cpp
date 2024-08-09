@@ -89,6 +89,20 @@ bool CCommon::GetFileLastModified(const wstring& file_path, unsigned __int64& mo
     return false;
 }
 
+time_t CCommon::FileTimeToTimeT(unsigned __int64 file_time)
+{
+    // 1601年到1970年之间的时间间隔，以100纳秒为单位
+    const ULONGLONG epochDelta = 116444736000000000ULL;
+
+    // 将 FILETIME 转换为自1970年1月1日以来的100纳秒间隔数
+    ULONGLONG ull = file_time - epochDelta;
+
+    // 将100纳秒转换为秒
+    time_t t = ull / 10000000ULL;
+
+    return t;
+}
+
 bool CCommon::IsFileHidden(const wstring& file_path)
 {
     DWORD attirbute = GetFileAttributes(file_path.c_str());
@@ -191,6 +205,30 @@ bool CCommon::CharIsNumber(wchar_t ch)
     return (ch >= L'0' && ch <= L'9');
 }
 
+int CCommon::StringToInt(const wstring& str)
+{
+    size_t start{ std::wstring::npos };
+    size_t end{ std::wstring::npos };
+    for (size_t i{}; i < str.size(); i++)
+    {
+        //标记第一个数字的位置
+        if (CharIsNumber(str[i]) && start == std::wstring::npos)
+            start = i;
+        //标记找到第一个数字后第一个不是数字的位置
+        if (start != std::wstring::npos && !CharIsNumber(str[i]))
+        {
+            end = i;
+            break;
+        }
+    }
+    if (start < str.size() && end > start)
+    {
+        wstring num_str = str.substr(start, end - start);
+        return _wtoi(num_str.c_str());
+    }
+    return 0;
+}
+
 void CCommon::StringSplitLine(const wstring& source_str, vector<wstring>& results, bool skip_empty, bool trim)
 {
     results.clear();
@@ -225,7 +263,8 @@ void CCommon::StringSplitLine(const wstring& source_str, vector<wstring>& result
     push_back_str(line_start_pos, cur_pos);
 }
 
-void CCommon::StringSplit(const wstring& str, wchar_t div_ch, vector<wstring>& results, bool skip_empty, bool trim)
+template<class T>
+static void _StringSplit(const T& str, wchar_t div_ch, vector<T>& results, bool skip_empty, bool trim)
 {
     results.clear();
     size_t split_index = -1;
@@ -233,9 +272,9 @@ void CCommon::StringSplit(const wstring& str, wchar_t div_ch, vector<wstring>& r
     while (true)
     {
         split_index = str.find(div_ch, split_index + 1);
-        wstring split_str = str.substr(last_split_index + 1, split_index - last_split_index - 1);
+        T split_str = str.substr(last_split_index + 1, split_index - last_split_index - 1);
         if (trim)
-            StringNormalize(split_str);
+            CCommon::StringNormalize(split_str);
         if (!split_str.empty() || !skip_empty)
             results.push_back(split_str);
         if (split_index == wstring::npos)
@@ -244,7 +283,8 @@ void CCommon::StringSplit(const wstring& str, wchar_t div_ch, vector<wstring>& r
     }
 }
 
-void CCommon::StringSplit(const wstring& str, const wstring& div_str, vector<wstring>& results, bool skip_empty /*= true*/, bool trim)
+template<class T>
+void _StringSplit(const T& str, const T& div_str, vector<T>& results, bool skip_empty /*= true*/, bool trim)
 {
     results.clear();
     size_t split_index = 0 - div_str.size();
@@ -252,15 +292,35 @@ void CCommon::StringSplit(const wstring& str, const wstring& div_str, vector<wst
     while (true)
     {
         split_index = str.find(div_str, split_index + div_str.size());
-        wstring split_str = str.substr(last_split_index + div_str.size(), split_index - last_split_index - div_str.size());
+        T split_str = str.substr(last_split_index + div_str.size(), split_index - last_split_index - div_str.size());
         if (trim)
-            StringNormalize(split_str);
+            CCommon::StringNormalize(split_str);
         if (!split_str.empty() || !skip_empty)
             results.push_back(split_str);
         if (split_index == wstring::npos)
             break;
         last_split_index = split_index;
     }
+}
+
+void CCommon::StringSplit(const wstring& str, wchar_t div_ch, vector<wstring>& results, bool skip_empty, bool trim)
+{
+    _StringSplit<std::wstring>(str, div_ch, results, skip_empty, trim);
+}
+
+void CCommon::StringSplit(const wstring& str, const wstring& div_str, vector<wstring>& results, bool skip_empty /*= true*/, bool trim)
+{
+    _StringSplit<std::wstring>(str, div_str, results, skip_empty, trim);
+}
+
+void CCommon::StringSplit(const string& str, char div_ch, vector<string>& result, bool skip_empty, bool trim)
+{
+    _StringSplit<std::string>(str, div_ch, result, skip_empty, trim);
+}
+
+void CCommon::StringSplit(const string& str, const string& div_str, vector<string>& results, bool skip_empty, bool trim)
+{
+    _StringSplit<std::string>(str, div_str, results, skip_empty, trim);
 }
 
 void CCommon::StringSplitWithMulitChars(const wstring& str, const wstring& div_ch, vector<wstring>& results, bool skip_empty /*= true*/)
@@ -682,9 +742,14 @@ bool CCommon::StringCharacterReplace(wstring& str, wchar_t ch, wchar_t ch_replac
 
 void CCommon::StringReplace(wstring& str, const wstring& str_old, const wstring& str_new)
 {
-    CString _str{ str.c_str() };
-    _str.Replace(str_old.c_str(), str_new.c_str());
-    str = _str.GetString();
+    if (str.empty())
+        return;
+    size_t pos = 0;
+    while ((pos = str.find(str_old, pos)) != std::wstring::npos)
+    {
+        str.replace(pos, str_old.length(), str_new);
+        pos += str_new.length();    // 前进到替换后的字符串末尾
+    }
 }
 
 CString CCommon::DataSizeToString(size_t data_size)
@@ -1652,7 +1717,7 @@ void CCommon::FileAutoRename(wstring& file_path)
 int CCommon::StringCompareInLocalLanguage(const wstring& str1, const wstring& str2, bool no_case)
 {
 #ifndef COMPILE_IN_WIN_XP
-    int rtn = CompareStringEx(LOCALE_NAME_USER_DEFAULT, (no_case ? NORM_IGNORECASE : 0), str1.c_str(), str1.size(), str2.c_str(), str2.size(), NULL, NULL, 0);
+    int rtn = CompareStringEx(LOCALE_NAME_USER_DEFAULT, (no_case ? NORM_IGNORECASE : 0) | SORT_DIGITSASNUMBERS, str1.c_str(), str1.size(), str2.c_str(), str2.size(), NULL, NULL, 0);
 #else
     int rtn = CompareString(LOCALE_NAME_USER_DEFAULT, (no_case ? NORM_IGNORECASE : 0), str1.c_str(), str1.size(), str2.c_str(), str2.size());
 #endif
@@ -1820,18 +1885,13 @@ POINT CCommon::CalculateWindowMoveOffset(CRect& check_rect, vector<CRect>& scree
     return mov;
 }
 
-wstring CCommon::GetLastCompileTime()
+void CCommon::GetLastCompileTime(wstring& time_str, wstring& hash_str)
 {
     wstring compile_time = GetTextResource(IDR_COMPILE_TIME, CodeType::ANSI);
     size_t pos = compile_time.find(L"\r\n");
-    while (pos != wstring::npos)
-    {
-        compile_time.replace(pos, 2, L"");
-        pos = compile_time.find(L"\r\n");
-    }
-    if (!compile_time.empty())
-        compile_time.pop_back();
-    return compile_time;
+    time_str = compile_time.substr(0, pos);
+    if (compile_time.size() > pos + 10)                 // 如果hash存在
+        hash_str = compile_time.substr(pos + 2, 8);     // 截取hash前8位
 }
 
 unsigned __int64 CCommon::GetCurTimeElapse()

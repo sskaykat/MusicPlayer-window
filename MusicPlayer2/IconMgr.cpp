@@ -216,33 +216,33 @@ std::tuple<UINT, UINT, UINT, UINT> IconMgr::GetIconID(IconType type)
     case IconMgr::IconType::IT_Shortcut:
         return { IDI_SHORTCUT_D, NULL, NULL, NULL };
     case IconMgr::IconType::IT_Album_Cover:
-        return { IDI_ALBUM_COVER_D, NULL, NULL, NULL };
+        return { IDI_ALBUM_COVER_D, IDI_ALBUM_COVER, NULL, NULL };
     case IconMgr::IconType::IT_Statistics:
         return { IDI_STATISTICS_D, NULL, NULL, NULL };
     case IconMgr::IconType::IT_File_Relate:
-        return { IDI_FILE_RELATE_D, NULL, NULL, NULL };
+        return { IDI_FILE_RELATE_D, IDI_FILE_RELATE, NULL, NULL };
     case IconMgr::IconType::IT_Help:
         return { IDI_HELP_D, IDI_HELP, NULL, NULL };
     case IconMgr::IconType::IT_Fix:
         return { IDI_FIX_D, NULL, NULL, NULL };
     case IconMgr::IconType::IT_Star:
-        return { IDI_STAR, NULL, NULL, NULL };
+        return { IDI_STAR_D, IDI_STAR, NULL, NULL };
     case IconMgr::IconType::IT_Artist:
-        return { IDI_ARTIST_D, NULL, NULL, NULL };
+        return { IDI_ARTIST_D, IDI_ARTIST, NULL, NULL };
     case IconMgr::IconType::IT_Album:
-        return { IDI_ALBUM_D, NULL, NULL, NULL };
+        return { IDI_ALBUM_D, IDI_ALBUM, NULL, NULL };
     case IconMgr::IconType::IT_Genre:
-        return { IDI_GENRE_D, NULL, NULL, NULL };
+        return { IDI_GENRE_D, IDI_GENRE, NULL, NULL };
     case IconMgr::IconType::IT_Year:
-        return { IDI_YEAR_D, NULL, NULL, NULL };
+        return { IDI_YEAR_D, IDI_YEAR, NULL, NULL };
     case IconMgr::IconType::IT_Bitrate:
-        return { IDI_BITRATE, NULL, NULL, NULL };
+        return { IDI_BITRATE_D, IDI_BITRATE, NULL, NULL };
     case IconMgr::IconType::IT_History:
-        return { IDI_RECENT_SONG_D, NULL, NULL, NULL };
+        return { IDI_RECENT_SONG_D, IDI_RECENT_SONG, NULL, NULL };
     case IconMgr::IconType::IT_Key_Board:
         return { IDI_HOT_KEY, NULL, NULL, NULL };
     case IconMgr::IconType::IT_Reverb:
-        return { IDI_REVERB, NULL, NULL, NULL };
+        return { IDI_REVERB_D, IDI_REVERB, NULL, NULL };
     case IconMgr::IconType::IT_Double_Line:
         return { IDI_DOUBLE_LINE_D, NULL, NULL, NULL };
     case IconMgr::IconType::IT_Lock:
@@ -252,11 +252,21 @@ std::tuple<UINT, UINT, UINT, UINT> IconMgr::GetIconID(IconType type)
     case IconMgr::IconType::IT_Rename:
         return { IDI_RENAME_D, NULL, NULL, NULL };
     case IconMgr::IconType::IT_Play_In_Playlist:
-        return { IDI_PLAY_IN_PLAYLIST, NULL, NULL, NULL };
+        return { IDI_PLAY_IN_PLAYLIST_D, IDI_PLAY_IN_PLAYLIST, NULL, NULL };
     case IconMgr::IconType::IT_Play_In_Folder:
         return { IDI_PLAY_IN_FOLDER, NULL, NULL, NULL };
     case IconMgr::IconType::IT_Tag:
         return { IDI_TAG, NULL, NULL, NULL };
+    case IconMgr::IconType::IT_More:
+        return { IDI_MORE_D, NULL, NULL, NULL };
+    case IconMgr::IconType::IT_NowPlaying:
+        return { IDI_NOW_PLAYING_D, IDI_NOW_PLAYING, NULL, NULL };
+    case IconMgr::IconType::IT_Karaoke:
+        return { IDI_KARAOKE_D, IDI_KARAOKE, NULL, NULL };
+    case IconMgr::IconType::IT_Refresh:
+        return { IDI_REFRESH_D, IDI_REFRESH, NULL, NULL };
+    case IconMgr::IconType::IT_NewFolder:
+        return { IDI_NEW_FOLDER_D, IDI_NEW_FOLDER, NULL, NULL };
     case IconMgr::IconType::IT_Le_Tag_Insert:
         return { NULL, NULL, NULL, IDI_ADD_TAG };
     case IconMgr::IconType::IT_Le_Tag_Replace:

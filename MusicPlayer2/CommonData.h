@@ -119,11 +119,9 @@ public:
 
 struct FontSet
 {
-    UIFont font9;				//普通的字体
-    UIFont font8;				//显示播放时间
-    UIFont font10;				//界面2的歌曲标题
-    UIFont font11;
-    UIFont font12;           //界面4的歌曲标题
+    const int FONT_SIZE_MIN{ 8 };
+    const int FONT_SIZE_MAX{ 16 };
+    std::map<int, UIFont> fonts;    //不同大小的默认字体
 
     UIFont dlg;                 // 窗口控件字体
     UIFont lyric;				//歌词字体
@@ -132,15 +130,11 @@ struct FontSet
     UIFont cortana_translate;	//搜索框翻译字体
 
 
-    void Init(LPCTSTR font_name)
-    {
-        font9.SetFont(9, font_name);
-        font8.SetFont(8, font_name);
-        font10.SetFont(10, font_name);
-        font11.SetFont(11, font_name);
-        font12.SetFont(12, font_name);
-        dlg.SetFont(9, font_name);
-    }
+    void Init(LPCTSTR font_name);
+
+    //获取一个指定大小的字体（目前支持8~16）
+    UIFont& GetFontBySize(int font_size);
+
 };
 
 
@@ -280,6 +274,7 @@ struct ApperanceSettingData
     bool show_fullscreen_btn_in_titlebar{ true };   //是否在标题栏显示“全屏模式”按钮
     bool show_skin_btn_in_titlebar{ false };        //是否在标题栏显示“切换界面”按钮
     bool show_settings_btn_in_titlebar{ false };    //是否在标题栏显示“设置”按钮
+    bool show_dark_light_btn_in_titlebar{ false };  //是否在标题栏显示“深色模式/浅色模式”按钮
     int TitleDisplayItem() const;
 };
 
@@ -346,10 +341,10 @@ enum MediaLibDisplayItem
     MLDI_YEAR = (1 << 3),
     MLDI_TYPE = (1 << 4),
     MLDI_BITRATE = (1 << 5),
-    MLDI_ALL = (1 << 6),
-    MLDI_RECENT = (1 << 7),
-    MLDI_FOLDER_EXPLORE = (1 << 8),
-    MLDI_RATING = (1 << 9)
+    MLDI_RATING = (1 << 6),
+    MLDI_ALL = (1 << 7),
+    MLDI_RECENT = (1 << 8),
+    MLDI_FOLDER_EXPLORE = (1 << 9)
 };
 
 struct MediaLibSettingData

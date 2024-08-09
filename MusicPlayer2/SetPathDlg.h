@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Common.h"
-#include "AudioCommon.h"
+#include "RecentFolderMgr.h"
 #include "ListCtrlEx.h"
 #include "TabDlg.h"
 #include "SearchEditCtrl.h"
@@ -25,6 +25,7 @@ public:
     void QuickSearch(const wstring& key_words);     //根据关键字执行快速查找（更新m_search_result）
     void AdjustColumnWidth();                       //自动调整列表宽度
     void RefreshTabData();                          //刷新标签页数据
+    bool SetCurSel(const wstring& folder_path);
 
 protected:
     bool m_searched{ false };           // 是否处于搜索状态
@@ -60,7 +61,7 @@ protected:
 public:
     virtual BOOL OnInitDialog();
     //afx_msg void OnBnClickedDeletePathButton();
-    //virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+    //virtual BOOL OnUiCommand(WPARAM wParam, LPARAM lParam);
     afx_msg void OnNMClickPathList(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnNMRClickPathList(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnNMDblclkPathList(NMHDR *pNMHDR, LRESULT *pResult);
@@ -79,4 +80,12 @@ protected:
     afx_msg LRESULT OnSearchEditBtnClicked(WPARAM wParam, LPARAM lParam);
 public:
     afx_msg void OnContainSubFolder();
+    afx_msg void OnBnClickedSortButton();
+    afx_msg void OnLibFolderSortRecentPlayed();
+    afx_msg void OnLibFolderSortRecentAdded();
+    afx_msg void OnLibFolderSortPath();
+    afx_msg void OnLibFolderProperties();
+    afx_msg void OnFileOpenFolder();
+    virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+    afx_msg void OnAddToNewPlaylist();
 };

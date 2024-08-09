@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "CommonData.h"
 #include "MusicPlayer2.h"
 
@@ -28,4 +28,25 @@ int ApperanceSettingData::TitleDisplayItem() const
     if (show_settings_btn_in_titlebar)
         value |= (1 << 5);
     return value;
+}
+
+void FontSet::Init(LPCTSTR font_name)
+{
+    for (int font_size{ FONT_SIZE_MIN }; font_size <= FONT_SIZE_MAX; font_size++)
+    {
+        fonts[font_size].SetFont(font_size, font_name);
+    }
+    dlg.SetFont(9, font_name);
+}
+
+UIFont& FontSet::GetFontBySize(int font_size)
+{
+    if (font_size < FONT_SIZE_MIN)
+        font_size = FONT_SIZE_MIN;
+    if (font_size > FONT_SIZE_MAX)
+        font_size = FONT_SIZE_MAX;
+    auto iter = fonts.find(font_size);
+    if (iter != fonts.end())
+        return iter->second;
+    return dlg;
 }

@@ -63,6 +63,9 @@ public:
 
     static bool GetFileLastModified(const wstring& file_path, unsigned __int64& modified_time);
 
+    //将FILETIME表示的时间转换为time_t（自1970年1月1日以来的秒数）
+    static time_t FileTimeToTimeT(unsigned __int64 file_time);
+
     //判断文件是否隐藏
     static bool IsFileHidden(const wstring& file_path);
 
@@ -110,6 +113,9 @@ public:
 
     static bool CharIsNumber(wchar_t ch);
 
+    //将字符串转换成整数，从字符串中提取第最先出现的数字
+    static int StringToInt(const wstring& str);
+
     // 按换行分割字符串，自适应CR/LF/CRLF换行
     static void StringSplitLine(const wstring& source_str, vector<wstring>& results, bool skip_empty = true, bool trim = true);
 
@@ -119,6 +125,8 @@ public:
     //result: 接收分割后的结果
     static void StringSplit(const wstring& str, wchar_t div_ch, vector<wstring>& results, bool skip_empty = true, bool trim = true);
     static void StringSplit(const wstring& str, const wstring& div_str, vector<wstring>& results, bool skip_empty = true, bool trim = true);
+    static void StringSplit(const string& str, char div_ch, vector<string>& result, bool skip_empty = true, bool trim = true);
+    static void StringSplit(const string& str, const string& div_str, vector<string>& results, bool skip_empty = true, bool trim = true);
 
     //将一个字符串分割成若干个字符串，可以指定多个分隔字符
     //str: 原始字符串
@@ -431,7 +439,7 @@ public:
     static POINT CalculateWindowMoveOffset(CRect& check_rect, vector<CRect>& screen_rects);
 
     //从资源文件读取上次编译时间
-    static wstring GetLastCompileTime();
+    static void GetLastCompileTime(wstring& time_str, wstring& hash_str);
 
     static unsigned __int64 GetCurTimeElapse();
 
